@@ -430,3 +430,31 @@ function calculateStreaks(entries) {
     document.getElementById('bestStreakVal').innerText = bestStreak;
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
 } 
+
+// Oturum Kontrolü ve Profil Bilgisi Yükleme
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        document.getElementById('appSidebar').style.display = 'flex';
+        
+        // Kullanıcı Profili Yükle
+        loadUserProfile(user.uid);
+        loadChartData();
+    } else {
+        document.getElementById('authSection').style.display = 'flex';
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('appSidebar').style.display = 'none';
+    }
+});
+
+function loadUserProfile(uid) {
+    db.ref(`users/${uid}/profile`).once('value', snapshot => {
+        const profile = snapshot.val() || {};
+        if (profile.isim) {
+            document.getElementById('welcomeUserName').innerText = profile.isim;
+        } else {
+            document.getElementById('welcomeUserName').innerText = "Öğrenci";
+        }
+    });
+}
