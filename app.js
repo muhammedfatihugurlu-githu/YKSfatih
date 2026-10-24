@@ -339,23 +339,82 @@ function loadCalendarGrid() {
 }
 
 function calculateStreaks(entries) {
-    let currentStreak = 0;
     let bestStreak = 0;
+    let tempStreak = 0;
     let totalWorkedDays = 0;
 
-    const sortedDates = Object.keys(entries).sort();
-
-    sortedDates.forEach(dateKey => {
+    // Çalışma yapılan günleri filtrele (yyyy-mm-dd formatında)
+    const workedDates = Object.keys(entries).filter(dateKey => {
         const entry = entries[dateKey];
-        if (!entry.calismadi && (entry.soru > 0 || entry.sure > 0)) {
-            totalWorkedDays++;
-            currentStreak++;
-            if (currentStreak > bestStreak) bestStreak = currentStreak;
-        } else {
-            currentStreak = 0;
-        }
-    });
+        return !entry.calismadi && (entry.soru > 0 || entry.sure > 0 || entry.sayfa > 0);
+    }).sort(); // Tarihleri kronolojik sıraya diz
 
+    totalWorkedDays = workedDates.length;
+
+    if (workedDates.length === 0) {
+        document.getElementById('currentStreakVal').innerText = 0;
+        document.getElementById('bestStreakVal').innerText = 0;
+        document.getElementById('totalDaysVal').innerText = 0;
+        return;
+    }
+
+    // 1. En İyi Seriyi Hesaplama (Tüm zamanların en uzun ardışık serisi)
+    for (let i = 0; i < workedDates.length; i++) {
+        if (i === 0) {
+            tempStreak = 1;
+        } else {
+            const prevDate = new Date(workedDates[i - 1]);
+            const currDate = new Date(workedDates[i]);
+            const diffTime = Math.abs(currDate - prevDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                tempStreak++; // Ardışık gün
+            } else {
+                tempStreak = 1; // Seri kırıldı, baştan başla
+            }
+        }
+
+        if (tempStreak > bestStreak) {
+            bestStreak = tempStreak;
+        }
+    }
+
+    // 2. Güncel Seriyi Hesaplama (Bugün veya Dünden başlayarak geriye doğru)
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // En son çalışılan günü al
+    const lastWorkedDateStr = workedDates[workedDates.length - 1];
+    const lastWorkedDate = new Date(lastWorkedDateStr);
+    lastWorkedDate.setHours(0, 0, 0, 0);
+
+    // Güncel serinin aktif sayılması için en son kayıt Bugün veya Dün yapılmış olmalı
+    if (lastWorkedDate.getTime() === today.getTime() || lastWorkedDate.getTime() === yesterday.getTime()) {
+        let checkDate = new Date(lastWorkedDate);
+
+        while (true) {
+            const mStr = String(checkDate.getMonth() + 1).padStart(2, '0');
+            const dStr = String(checkDate.getDate()).padStart(2, '0');
+            const dateStr = `${checkDate.getFullYear()}-${mStr}-${dStr}`;
+
+            if (workedDates.includes(dateStr)) {
+                currentStreak++;
+                // Bir önceki güne git
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break; // Ardışık gün bitti
+            }
+        }
+    } else {
+        currentStreak = 0; // Son kayıt bugün veya dün değilse güncel seri sıfırlanır
+    }
+
+    // Ekrandaki değerleri güncelle
     document.getElementById('currentStreakVal').innerText = currentStreak;
     document.getElementById('bestStreakVal').innerText = bestStreak;
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
