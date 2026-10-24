@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YKS Takip</title>
     <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome İkonları -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -15,7 +14,7 @@
 <body>
 
     <div class="container">
-        <!-- Sol İkonik Sidebar (bahadirunal.com tarzı) -->
+        <!-- Sol İkonik Sidebar -->
         <aside class="sidebar">
             <div class="logo-box">Y</div>
             <nav>
@@ -48,11 +47,11 @@
                     </form>
 
                     <div class="auth-links">
-                        <a href="#" id="toRegister">Hesabın yok mu? Kayıt Ol</a>
+                        <a href="javascript:void(0)" onclick="openRegister()">Hesabın yok mu? Kayıt Ol</a>
                     </div>
                 </div>
 
-                <!-- KAYIT OL FORMU -->
+                <!-- KAYIT OL FORMU (Başlangıçta Gizli) -->
                 <div id="registerFormSection" style="display: none;">
                     <h2>Kayıt Ol</h2>
                     <p class="auth-desc">Aramıza katılmak için bilgilerini gir.</p>
@@ -82,14 +81,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Şifre</label>
+                            <label>Şifre Oluştur</label>
                             <input type="password" id="regPassword" placeholder="********" required>
                         </div>
                         <button type="submit" class="btn-submit">Kayıt Ol</button>
                     </form>
 
                     <div class="auth-links">
-                        <a href="#" id="toLogin">Zaten hesabın var mı? Giriş Yap</a>
+                        <a href="javascript:void(0)" onclick="openLogin()">Zaten hesabın var mı? Giriş Yap</a>
                     </div>
                 </div>
 
