@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YKS Takip - Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome İkonları -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js (Grafikler İçin) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -17,7 +14,7 @@
 <body>
 
     <div class="container">
-        <!-- Sol İkonik Sidebar (Giriş Yapılınca Aktif Olur) -->
+        <!-- Sidebar -->
         <aside class="sidebar" id="appSidebar" style="display: none;">
             <div class="logo-box">Y</div>
             <nav>
@@ -28,16 +25,15 @@
             </nav>
         </aside>
 
-        <!-- Ana İçerik Alanı -->
+        <!-- Ana İçerik -->
         <main class="main-content">
             
-            <!-- 1. GİRİŞ / KAYIT EKRANI -->
+            <!-- GİRİŞ / KAYIT EKRANI -->
             <div id="authSection" class="auth-wrapper">
                 <div class="auth-card">
-                    <!-- GİRİŞ FORMU -->
                     <div id="loginFormSection">
                         <h2>Giriş Yap</h2>
-                        <p class="auth-desc">E-posta ve şifrenizle hesabınıza giriş yapın.</p>
+                        <p class="auth-desc">E-posta ve şifrenizle giriş yapın.</p>
                         <form id="loginForm">
                             <div class="form-group">
                                 <label>E-posta</label>
@@ -54,10 +50,9 @@
                         </div>
                     </div>
 
-                    <!-- KAYIT OL FORMU -->
                     <div id="registerFormSection" style="display: none;">
                         <h2>Kayıt Ol</h2>
-                        <p class="auth-desc">Bilgilerini doldurarak hemen aramıza katıl.</p>
+                        <p class="auth-desc">Bilgilerini doldurarak aramıza katıl.</p>
                         <form id="registerForm">
                             <div class="form-group">
                                 <label>Ad Soyad</label>
@@ -95,10 +90,10 @@
                 </div>
             </div>
 
-            <!-- 2. DASHBOARD ÖZELLİKLERİ (Giriş Yapınca Görünecek) -->
+            <!-- DASHBOARD -->
             <div id="dashboardSection" class="dashboard-wrapper" style="display: none;">
 
-                <!-- BİLGİ GİRİŞİ (CREATE VIEW) -->
+                <!-- BİLGİ GİRİŞİ -->
                 <div id="createView" class="view-section" style="display: none;">
                     <div class="content-header">
                         <span class="badge">GÜNLÜK KAYIT</span>
@@ -108,11 +103,9 @@
 
                     <div class="form-card">
                         <form id="studyForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Tarih</label>
-                                    <input type="date" id="studyDate" required>
-                                </div>
+                            <div class="form-group">
+                                <label>Tarih</label>
+                                <input type="date" id="studyDate" required>
                             </div>
                             <div class="form-row two-cols">
                                 <div class="form-group">
@@ -155,47 +148,44 @@
                     </div>
                 </div>
 
-                <!-- ÇALIŞMA GRAFİĞİ (GRAPHICS VIEW) -->
+                <!-- ÇALIŞMA GRAFİĞİ -->
                 <div id="graphicsView" class="view-section">
-                    <div class="graphics-container">
-                        <div class="main-chart-area">
-                            <h2>Çalışma Grafiği</h2>
-                            <p class="subtitle">Çözdüğün soru ve çalışma sürelerinin grafiksel analizi.</p>
-                            <div class="chart-box">
-                                <canvas id="studyChart"></canvas>
+                    <div class="graphics-full-card">
+                        <div class="graphics-header-top">
+                            <div>
+                                <h2>Çalışma Grafiği</h2>
+                                <p class="subtitle">Senin değerlerin ve grafiksel analizin.</p>
                             </div>
+                            <!-- Periyot Seçim Dropdown -->
+                            <select id="timeRangeSelect" class="time-select" onchange="loadChartData()">
+                                <option value="10days">Son 10 Gün</option>
+                                <option value="weekly">Haftalık</option>
+                                <option value="monthly">Aylık</option>
+                                <option value="yearly">Yıllık</option>
+                            </select>
                         </div>
-                        <div class="side-stats-area">
-                            <div class="card-box">
-                                <h3>🔥 Haftalık Hedefler</h3>
-                                <div class="goal-item">
-                                    <span>Soru Çözme</span>
-                                    <b id="goalQuestions">0 / 500</b>
-                                </div>
-                                <div class="goal-item">
-                                    <span>Çalışma Süresi</span>
-                                    <b id="goalHours">0 sa / 20 sa</b>
-                                </div>
-                            </div>
-                            <div class="card-box">
-                                <h3>📊 Seri Bilgileri</h3>
-                                <p>Güncel Seri: <b id="currentStreak">0 gün</b></p>
-                                <p>Toplam Kayıt: <b id="totalDays">0 gün</b></p>
-                            </div>
+
+                        <!-- Soru, Kitap, Çalışma Filtre Butonları -->
+                        <div class="chart-filter-tabs">
+                            <button class="filter-btn active" onclick="setChartMetric('soru', this)">SORU</button>
+                            <button class="filter-btn" onclick="setChartMetric('kitap', this)">KİTAP</button>
+                            <button class="filter-btn" onclick="setChartMetric('calisma', this)">ÇALIŞMA</button>
+                        </div>
+
+                        <div class="chart-box-full">
+                            <canvas id="studyChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- ÇALIŞMA TAKVİMİ (CALENDAR VIEW) -->
+                <!-- ÇALIŞMA TAKVİMİ -->
                 <div id="calendarView" class="view-section" style="display: none;">
                     <div class="content-header">
                         <h2>📅 Çalışma Takvimi</h2>
                         <p>Çalışma yaptığın günler yeşil renkle işaretlenir.</p>
                     </div>
                     <div class="calendar-grid-card">
-                        <div class="calendar-grid" id="calendarGrid">
-                            <!-- Takvim günleri JS ile doldurulacak -->
-                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
                     </div>
                 </div>
 

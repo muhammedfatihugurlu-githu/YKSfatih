@@ -15,8 +15,8 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 let selectedLessons = [];
+let currentMetric = 'soru'; // Varsayılan filtre: soru
 
-// Sekme Değiştirme
 function switchTab(viewId) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
     document.getElementById(viewId).style.display = 'block';
@@ -28,7 +28,6 @@ function switchTab(viewId) {
     if (viewId === 'calendarView') loadCalendarGrid();
 }
 
-// Auth Ekranı Geçişleri
 function openRegister() {
     document.getElementById('loginFormSection').style.display = 'none';
     document.getElementById('registerFormSection').style.display = 'block';
@@ -39,7 +38,6 @@ function openLogin() {
     document.getElementById('loginFormSection').style.display = 'block';
 }
 
-// Ders Etiket Seçimi
 function toggleTag(element) {
     element.classList.toggle('selected');
     const lesson = element.innerText;
@@ -50,13 +48,12 @@ function toggleTag(element) {
     }
 }
 
-// Oturum Kontrolü
 auth.onAuthStateChanged(user => {
     if (user) {
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('dashboardSection').style.display = 'block';
         document.getElementById('appSidebar').style.display = 'flex';
-        loadUserData(user.uid);
+        loadChartData();
     } else {
         document.getElementById('authSection').style.display = 'flex';
         document.getElementById('dashboardSection').style.display = 'none';
@@ -64,7 +61,6 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// Kayıt Olma
 document.getElementById('registerForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('regName').value;
@@ -74,9 +70,7 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
     const password = document.getElementById('regPassword').value;
 
     auth.createUserWithEmailAndPassword(email, password)
-        .then(cred => {
-            return db.ref('users/' + cred.user.uid + '/profile').set({ isim: name, eposta: email, telefon: phone, sinif: grade });
-        })
+        .then(cred => db.ref('users/' + cred.user.uid + '/profile').set({ isim: name, eposta: email, telefon: phone, sinif: grade }))
         .then(() => {
             alert("Kayıt başarılı! Giriş yapabilirsiniz.");
             openLogin();
@@ -84,7 +78,6 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
         .catch(err => alert("Kayıt Hatası: " + err.message));
 });
 
-// Giriş Yapma
 document.getElementById('loginForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value;
@@ -98,7 +91,6 @@ function logoutUser() {
     auth.signOut();
 }
 
-// Çalışma Kaydetme
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -139,25 +131,65 @@ function markAsNotStudied() {
         .then(() => alert("Bugün çalışılmadı olarak işaretlendi."));
 }
 
-// Grafik Yükleme (Chart.js)
+// Grafik Metrik Değişimi (SORU, KİTAP, ÇALIŞMA)
+function setChartMetric(metric, btn) {
+    currentMetric = metric;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadChartData();
+}
+
+// Gelişmiş Grafik Çizimi (Son 10 Gün, Haftalık, Aylık, Yıllık)
 let myChart = null;
 function loadChartData() {
     const user = auth.currentUser;
     if (!user) return;
 
+    const range = document.getElementById('timeRangeSelect').value;
     db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
         const data = snapshot.val() || {};
-        const dates = [];
-        const questions = [];
+        let labels = [];
+        let values = [];
 
-        // Son 7-10 günü alalım
-        for (let i = 6; i >= 0; i--) {
+        let count = 10;
+        if (range === 'weekly') count = 7;
+        else if (range === 'monthly') count = 30;
+        else if (range === 'yearly') count = 12; // AYLAR
+
+        for (let i = count - 1; i >= 0; i--) {
             const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = d.toISOString().split('T')[0];
-            dates.push(dateStr);
-            questions.push(data[dateStr] ? data[dateStr].soru || 0 : 0);
+            if (range === 'yearly') {
+                d.setMonth(d.getMonth() - i);
+                const monthStr = d.toLocaleString('tr-TR', { month: 'short' });
+                labels.push(monthStr);
+                
+                let monthTotal = 0;
+                Object.keys(data).forEach(dateKey => {
+                    if (dateKey.startsWith(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)) {
+                        if (currentMetric === 'soru') monthTotal += data[dateKey].soru || 0;
+                        if (currentMetric === 'kitap') monthTotal += data[dateKey].sayfa || 0;
+                        if (currentMetric === 'calisma') monthTotal += data[dateKey].sure || 0;
+                    }
+                });
+                values.push(monthTotal);
+            } else {
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                labels.push(dateStr);
+
+                let val = 0;
+                if (data[dateStr]) {
+                    if (currentMetric === 'soru') val = data[dateStr].soru || 0;
+                    if (currentMetric === 'kitap') val = data[dateStr].sayfa || 0;
+                    if (currentMetric === 'calisma') val = data[dateStr].sure || 0;
+                }
+                values.push(val);
+            }
         }
+
+        let labelName = 'Çözülen Soru';
+        if (currentMetric === 'kitap') labelName = 'Okunan Sayfa (Kitap)';
+        if (currentMetric === 'calisma') labelName = 'Çalışma Süresi (Saat)';
 
         const ctx = document.getElementById('studyChart').getContext('2d');
         if (myChart) myChart.destroy();
@@ -165,10 +197,10 @@ function loadChartData() {
         myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dates,
+                labels: labels,
                 datasets: [{
-                    label: 'Çözülen Soru',
-                    data: questions,
+                    label: labelName,
+                    data: values,
                     borderColor: '#4f46e5',
                     backgroundColor: 'rgba(79, 70, 229, 0.1)',
                     fill: true,
@@ -180,7 +212,6 @@ function loadChartData() {
     });
 }
 
-// Takvim Grid Doldurma
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -190,7 +221,7 @@ function loadCalendarGrid() {
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
 
-        const daysInMonth = 31; // Ekim ayı için
+        const daysInMonth = 31;
         for (let day = 1; day <= daysInMonth; day++) {
             const dayStr = `2026-10-${day < 10 ? '0' + day : day}`;
             const div = document.createElement('div');
@@ -202,25 +233,5 @@ function loadCalendarGrid() {
             }
             grid.appendChild(div);
         }
-    });
-}
-
-function loadUserData(uid) {
-    db.ref(`users/${uid}/entries`).once('value', snapshot => {
-        const data = snapshot.val() || {};
-        let totalQ = 0;
-        let totalH = 0;
-        let daysCount = 0;
-
-        Object.values(data).forEach(entry => {
-            totalQ += entry.soru || 0;
-            totalH += entry.sure || 0;
-            if (!entry.calismadi) daysCount++;
-        });
-
-        document.getElementById('goalQuestions').innerText = `${totalQ} / 500`;
-        document.getElementById('goalHours').innerText = `${totalH.toFixed(1)} sa / 20 sa`;
-        document.getElementById('currentStreak').innerText = `${daysCount} gün`;
-        document.getElementById('totalDays').innerText = `${daysCount} gün`;
     });
 }
