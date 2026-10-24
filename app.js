@@ -39,11 +39,15 @@ function openLogin() {
     document.getElementById('loginFormSection').style.display = 'block';
 }
 
+// Oturum Kontrolü ve Profil Bilgisi Yükleme
 auth.onAuthStateChanged(user => {
     if (user) {
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('dashboardSection').style.display = 'block';
         document.getElementById('appSidebar').style.display = 'flex';
+        
+        // Kullanıcı Profili Yükle
+        loadUserProfile(user);
         loadChartData();
     } else {
         document.getElementById('authSection').style.display = 'flex';
@@ -61,7 +65,15 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
     const password = document.getElementById('regPassword').value;
 
     auth.createUserWithEmailAndPassword(email, password)
-        .then(cred => db.ref('users/' + cred.user.uid + '/profile').set({ isim: name, eposta: email, telefon: phone, sinif: grade }))
+        .then(cred => {
+            cred.user.updateProfile({ displayName: name });
+            return db.ref('users/' + cred.user.uid + '/profile').set({ 
+                isim: name, 
+                eposta: email, 
+                telefon: phone, 
+                sinif: grade 
+            });
+        })
         .then(() => {
             alert("Kayıt başarılı! Giriş yapabilirsiniz.");
             openLogin();
@@ -330,7 +342,6 @@ function loadReportsTable() {
         const tbody = document.getElementById('reportsTableBody');
         tbody.innerHTML = '';
 
-        // Tarihe göre tersten sırala (en yeniler üstte)
         const sortedDates = Object.keys(data).sort().reverse();
 
         if (sortedDates.length === 0) {
@@ -344,7 +355,6 @@ function loadReportsTable() {
             const hours = Math.floor(totalHours);
             const minutes = Math.round((totalHours - hours) * 60);
 
-            // Tarih formatını gg.aa.yyyy yapalım
             const parts = dateStr.split('-');
             const formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
 
@@ -431,30 +441,17 @@ function calculateStreaks(entries) {
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
 } 
 
-// Oturum Kontrolü ve Profil Bilgisi Yükleme
-auth.onAuthStateChanged(user => {
-    if (user) {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        document.getElementById('appSidebar').style.display = 'flex';
-        
-        // Kullanıcı Profili Yükle
-        loadUserProfile(user.uid);
-        loadChartData();
-    } else {
-        document.getElementById('authSection').style.display = 'flex';
-        document.getElementById('dashboardSection').style.display = 'none';
-        document.getElementById('appSidebar').style.display = 'none';
-    }
-});
+function loadUserProfile(user) {
+    if (!user) return;
 
-function loadUserProfile(uid) {
-    db.ref(`users/${uid}/profile`).once('value', snapshot => {
-        const profile = snapshot.val() || {};
-        if (profile.isim) {
+    if (user.displayName) {
+        document.getElementById('welcomeUserName').innerText = user.displayName;
+    }
+
+    db.ref(`users/${user.uid}/profile`).once('value', snapshot => {
+        const profile = snapshot.val();
+        if (profile && profile.isim) {
             document.getElementById('welcomeUserName').innerText = profile.isim;
-        } else {
-            document.getElementById('welcomeUserName').innerText = "Öğrenci";
         }
     });
 }
