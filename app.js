@@ -14,7 +14,6 @@ if (!firebase.apps.length) {
 const db = firebase.database();
 const auth = firebase.auth();
 
-let selectedLessons = [];
 let currentMetric = 'soru'; 
 let currentCalendarDate = new Date(); // Dinamik takvim ayı için
 
@@ -37,16 +36,6 @@ function openRegister() {
 function openLogin() {
     document.getElementById('registerFormSection').style.display = 'none';
     document.getElementById('loginFormSection').style.display = 'block';
-}
-
-function toggleTag(element) {
-    element.classList.toggle('selected');
-    const lesson = element.innerText;
-    if (selectedLessons.includes(lesson)) {
-        selectedLessons = selectedLessons.filter(l => l !== lesson);
-    } else {
-        selectedLessons.push(lesson);
-    }
 }
 
 auth.onAuthStateChanged(user => {
@@ -92,6 +81,7 @@ function logoutUser() {
     auth.signOut();
 }
 
+// Bilgi Girişi (Ders Seçimi Kaldırılmış Sade Hali)
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -107,7 +97,6 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
         soru: questions,
         sayfa: pages,
         sure: hours + (minutes / 60),
-        dersler: selectedLessons,
         timestamp: Date.now()
     };
 
@@ -115,8 +104,6 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
         .then(() => {
             alert("Çalışma başarıyla kaydedildi! 🚀");
             document.getElementById('studyForm').reset();
-            selectedLessons = [];
-            document.querySelectorAll('.tag').forEach(t => t.classList.remove('selected'));
         })
         .catch(err => alert("Kayıt hatası: " + err.message));
 });
@@ -291,13 +278,13 @@ function loadChartData() {
     });
 }
 
-// Takvim Ay Değiştirme ve Seri Hesaplama
+// Takvim Ay Değiştirme
 function changeCalendarMonth(offset) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
     loadCalendarGrid();
 }
 
-// Takvim Kutularını Çizme (Herhangi bir kayıt yapılmışsa yeşil gösterir)
+// Takvim Kutularını Çizme (Herhangi bir kayıt yapılmışsa YEŞİL gösterir)
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -324,7 +311,7 @@ function loadCalendarGrid() {
             div.className = 'cal-day';
             div.innerText = day;
 
-            // Herhangi bir veri/kayıt varsa (Çalışılsa da "Bugün çalışmadım" dense de) YEŞİL yapıyoruz
+            // Kayıt yapılmış tüm günler (çalışılsa da "Bugün çalışmadım" seçilse de) YEŞİL renkte görünür
             if (data[dateStr]) {
                 div.classList.add('worked');
             }
@@ -336,15 +323,13 @@ function loadCalendarGrid() {
     });
 }
 
-// Seri Hesaplama (Sisteme kayıt girilen HER GÜN seriyi korur)
+// Seri Hesaplama (Giriş Yapılan Tüm Günler Seriyi Korur)
 function calculateStreaks(entries) {
     let bestStreak = 0;
     let tempStreak = 0;
     let totalWorkedDays = 0;
 
-    // Sisteme kayıt yapılmış tüm tarihleri alıp sıralıyoruz
     const registeredDates = Object.keys(entries).sort();
-
     totalWorkedDays = registeredDates.length;
 
     if (registeredDates.length === 0) {
@@ -354,7 +339,7 @@ function calculateStreaks(entries) {
         return;
     }
 
-    // 1. En İyi Seri Hesaplama (Kayıt girilmiş tüm ardışık günler)
+    // 1. En İyi Seri Hesaplama
     for (let i = 0; i < registeredDates.length; i++) {
         if (i === 0) {
             tempStreak = 1;
@@ -376,7 +361,7 @@ function calculateStreaks(entries) {
         }
     }
 
-    // 2. Güncel Seri Hesaplama (Bugün veya dünden geriye doğru kayıt girilmiş gün dizisi)
+    // 2. Güncel Seri Hesaplama (Bugün veya Dünden Başlayarak)
     let currentStreak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -388,7 +373,6 @@ function calculateStreaks(entries) {
     const lastWorkedDate = new Date(lastWorkedDateStr);
     lastWorkedDate.setHours(0, 0, 0, 0);
 
-    // Son kayıt Bugün veya Dün ise güncel seri aktiftir
     if (lastWorkedDate.getTime() === today.getTime() || lastWorkedDate.getTime() === yesterday.getTime()) {
         let checkDate = new Date(lastWorkedDate);
 
