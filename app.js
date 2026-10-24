@@ -1,6 +1,13 @@
 // Firebase Yapılandırması
 const firebaseConfig = {
-    databaseURL: "https://fetih-social-default-rtdb.firebaseio.com/"
+  apiKey: "AIzaSyDWCM6kkyW1uhMVdYaYQEzfNZM6GM9tmUY",
+  authDomain: "fetih-social.firebaseapp.com",
+  databaseURL: "https://fetih-social-default-rtdb.firebaseio.com",
+  projectId: "fetih-social",
+  storageBucket: "fetih-social.firebasestorage.app",
+  messagingSenderId: "787128595926",
+  appId: "1:787128595926:web:c81ddfd9c3b3989536a077",
+  measurementId: "G-2LDX8H85H9"
 };
 
 if (!firebase.apps.length) {
