@@ -441,26 +441,35 @@ function calculateStreaks(entries) {
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
 } 
 
+// Oturum açıldığında o anki kullanıcının veritabanındaki ismini çek
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
+        document.getElementById('appSidebar').style.display = 'flex';
+        
+        // Giriş yapan kullanıcının kendi UID'sine göre ismini yüklüyoruz
+        loadUserProfile(user);
+        loadChartData();
+    } else {
+        document.getElementById('authSection').style.display = 'flex';
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('appSidebar').style.display = 'none';
+    }
+});
+
+// Herkesin kendi kaydettiği ismi Firebase'den dinamik olarak getiren fonksiyon
 function loadUserProfile(user) {
     if (!user) return;
 
-    // 1. Önce varsayılan olarak e-postanın başını kullanalım (örn: fatih@mail.com -> fatih)
-    let displayName = user.email ? user.email.split('@')[0] : "Öğrenci";
-
-    if (user.displayName) {
-        displayName = user.displayName;
-    }
-
-    document.getElementById('welcomeUserName').innerText = displayName;
-
-    // 2. Realtime Database'den gerçek ismi kontrol et
     db.ref(`users/${user.uid}/profile`).once('value', snapshot => {
         const profile = snapshot.val();
         if (profile && profile.isim) {
+            // Veritabanında kayıtlı olan gerçek ismi yazdırır
             document.getElementById('welcomeUserName').innerText = profile.isim;
         } else {
-            // Eğer veritabanında isim yoksa, otomatik olarak veritabanına da kaydedelim
-            db.ref(`users/${user.uid}/profile`).update({ isim: displayName });
+            // Eğer profil verisi henüz oluşmadıysa e-postasının başını yazar
+            document.getElementById('welcomeUserName').innerText = user.email ? user.email.split('@')[0] : "Öğrenci";
         }
     });
 }
