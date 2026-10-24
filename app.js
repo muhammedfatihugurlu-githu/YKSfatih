@@ -444,14 +444,23 @@ function calculateStreaks(entries) {
 function loadUserProfile(user) {
     if (!user) return;
 
+    // 1. Önce varsayılan olarak e-postanın başını kullanalım (örn: fatih@mail.com -> fatih)
+    let displayName = user.email ? user.email.split('@')[0] : "Öğrenci";
+
     if (user.displayName) {
-        document.getElementById('welcomeUserName').innerText = user.displayName;
+        displayName = user.displayName;
     }
 
+    document.getElementById('welcomeUserName').innerText = displayName;
+
+    // 2. Realtime Database'den gerçek ismi kontrol et
     db.ref(`users/${user.uid}/profile`).once('value', snapshot => {
         const profile = snapshot.val();
         if (profile && profile.isim) {
             document.getElementById('welcomeUserName').innerText = profile.isim;
+        } else {
+            // Eğer veritabanında isim yoksa, otomatik olarak veritabanına da kaydedelim
+            db.ref(`users/${user.uid}/profile`).update({ isim: displayName });
         }
     });
 }
