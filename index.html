@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Takip</title>
+    <title>YKS Takip - Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome İkonları -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js (Grafikler İçin) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -14,81 +17,185 @@
 <body>
 
     <div class="container">
-        <!-- Sol İkonik Sidebar -->
-        <aside class="sidebar">
+        <!-- Sol İkonik Sidebar (Giriş Yapılınca Aktif Olur) -->
+        <aside class="sidebar" id="appSidebar" style="display: none;">
             <div class="logo-box">Y</div>
             <nav>
-                <a href="#" class="active" title="Giriş / Kayıt"><i class="fa-solid fa-user"></i></a>
-                <a href="#" title="Grafikler"><i class="fa-solid fa-chart-line"></i></a>
-                <a href="#" title="Haftalık Plan"><i class="fa-solid fa-calendar-days"></i></a>
-                <a href="#" title="Mesajlar"><i class="fa-solid fa-envelope"></i></a>
+                <a href="#" onclick="switchTab('graphicsView')" class="active" title="Çalışma Grafiği"><i class="fa-solid fa-chart-line"></i></a>
+                <a href="#" onclick="switchTab('calendarView')" title="Çalışma Takvimi"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="#" onclick="switchTab('createView')" title="Bilgi Girişi"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="#" onclick="logoutUser()" title="Çıkış Yap"><i class="fa-solid fa-right-from-bracket"></i></a>
             </nav>
         </aside>
 
-        <!-- Ana İçerik -->
+        <!-- Ana İçerik Alanı -->
         <main class="main-content">
-            <div class="auth-card">
-                
-                <!-- GİRİŞ YAP FORMU -->
-                <div id="loginFormSection">
-                    <h2>Giriş Yap</h2>
-                    <p class="auth-desc">Artık e-posta ve şifre ile giriş yapabilirsiniz.</p>
-                    
-                    <form id="loginForm">
-                        <div class="form-group">
-                            <label>E-posta</label>
-                            <input type="email" id="loginEmail" placeholder="ornek@mail.com" required>
+            
+            <!-- 1. GİRİŞ / KAYIT EKRANI -->
+            <div id="authSection" class="auth-wrapper">
+                <div class="auth-card">
+                    <!-- GİRİŞ FORMU -->
+                    <div id="loginFormSection">
+                        <h2>Giriş Yap</h2>
+                        <p class="auth-desc">E-posta ve şifrenizle hesabınıza giriş yapın.</p>
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label>E-posta</label>
+                                <input type="email" id="loginEmail" placeholder="ornek@mail.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Şifre</label>
+                                <input type="password" id="loginPassword" placeholder="********" required>
+                            </div>
+                            <button type="submit" class="btn-submit">Giriş Yap</button>
+                        </form>
+                        <div class="auth-links">
+                            <a href="javascript:void(0)" onclick="openRegister()">Hesabın yok mu? Kayıt Ol</a>
                         </div>
-                        <div class="form-group">
-                            <label>Şifre</label>
-                            <input type="password" id="loginPassword" placeholder="********" required>
-                        </div>
-                        <button type="submit" class="btn-submit">Giriş Yap</button>
-                    </form>
+                    </div>
 
-                    <div class="auth-links">
-                        <a href="javascript:void(0)" onclick="openRegister()">Hesabın yok mu? Kayıt Ol</a>
+                    <!-- KAYIT OL FORMU -->
+                    <div id="registerFormSection" style="display: none;">
+                        <h2>Kayıt Ol</h2>
+                        <p class="auth-desc">Bilgilerini doldurarak hemen aramıza katıl.</p>
+                        <form id="registerForm">
+                            <div class="form-group">
+                                <label>Ad Soyad</label>
+                                <input type="text" id="regName" placeholder="Ad Soyad" required>
+                            </div>
+                            <div class="form-group">
+                                <label>E-posta</label>
+                                <input type="email" id="regEmail" placeholder="ornek@mail.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Telefon Numarası</label>
+                                <input type="tel" id="regPhone" placeholder="05XXXXXXXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Kaçıncı Sınıf?</label>
+                                <select id="regGrade" required>
+                                    <option value="">Sınıf Seçiniz</option>
+                                    <option value="9">9. Sınıf</option>
+                                    <option value="10">10. Sınıf</option>
+                                    <option value="11">11. Sınıf</option>
+                                    <option value="12">12. Sınıf</option>
+                                    <option value="Mezun">Mezun</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Şifre Oluştur</label>
+                                <input type="password" id="regPassword" placeholder="********" required>
+                            </div>
+                            <button type="submit" class="btn-submit">Kayıt Ol</button>
+                        </form>
+                        <div class="auth-links">
+                            <a href="javascript:void(0)" onclick="openLogin()">Zaten hesabın var mı? Giriş Yap</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. DASHBOARD ÖZELLİKLERİ (Giriş Yapınca Görünecek) -->
+            <div id="dashboardSection" class="dashboard-wrapper" style="display: none;">
+
+                <!-- BİLGİ GİRİŞİ (CREATE VIEW) -->
+                <div id="createView" class="view-section" style="display: none;">
+                    <div class="content-header">
+                        <span class="badge">GÜNLÜK KAYIT</span>
+                        <h1>Bugünkü çalışmanı hızlıca ekle</h1>
+                        <p>Soru, süre, sayfa ve ders bilgilerini tek yerden girebilirsin.</p>
+                    </div>
+
+                    <div class="form-card">
+                        <form id="studyForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Tarih</label>
+                                    <input type="date" id="studyDate" required>
+                                </div>
+                            </div>
+                            <div class="form-row two-cols">
+                                <div class="form-group">
+                                    <label>Soru Sayısı</label>
+                                    <input type="number" id="studyQuestions" placeholder="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Okunan Sayfa</label>
+                                    <input type="number" id="studyPages" placeholder="0" min="0">
+                                </div>
+                            </div>
+                            <div class="form-row two-cols">
+                                <div class="form-group">
+                                    <label>Saat</label>
+                                    <input type="number" id="studyHours" placeholder="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Dakika</label>
+                                    <input type="number" id="studyMinutes" placeholder="0" min="0" max="59">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Ders Seçimi</label>
+                                <div class="lesson-tags" id="lessonTags">
+                                    <span class="tag" onclick="toggleTag(this)">Matematik</span>
+                                    <span class="tag" onclick="toggleTag(this)">AYT Matematik</span>
+                                    <span class="tag" onclick="toggleTag(this)">Türkçe</span>
+                                    <span class="tag" onclick="toggleTag(this)">Edebiyat</span>
+                                    <span class="tag" onclick="toggleTag(this)">Coğrafya</span>
+                                    <span class="tag" onclick="toggleTag(this)">Fizik</span>
+                                    <span class="tag" onclick="toggleTag(this)">Kimya</span>
+                                    <span class="tag" onclick="toggleTag(this)">Biyoloji</span>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit">Kaydet</button>
+                                <button type="button" class="btn-secondary" onclick="markAsNotStudied()">Bugün çalışmadım</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <!-- KAYIT OL FORMU (Başlangıçta Gizli) -->
-                <div id="registerFormSection" style="display: none;">
-                    <h2>Kayıt Ol</h2>
-                    <p class="auth-desc">Aramıza katılmak için bilgilerini gir.</p>
-                    
-                    <form id="registerForm">
-                        <div class="form-group">
-                            <label>Ad Soyad</label>
-                            <input type="text" id="regName" placeholder="Ad Soyad" required>
+                <!-- ÇALIŞMA GRAFİĞİ (GRAPHICS VIEW) -->
+                <div id="graphicsView" class="view-section">
+                    <div class="graphics-container">
+                        <div class="main-chart-area">
+                            <h2>Çalışma Grafiği</h2>
+                            <p class="subtitle">Çözdüğün soru ve çalışma sürelerinin grafiksel analizi.</p>
+                            <div class="chart-box">
+                                <canvas id="studyChart"></canvas>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>E-posta</label>
-                            <input type="email" id="regEmail" placeholder="ornek@mail.com" required>
+                        <div class="side-stats-area">
+                            <div class="card-box">
+                                <h3>🔥 Haftalık Hedefler</h3>
+                                <div class="goal-item">
+                                    <span>Soru Çözme</span>
+                                    <b id="goalQuestions">0 / 500</b>
+                                </div>
+                                <div class="goal-item">
+                                    <span>Çalışma Süresi</span>
+                                    <b id="goalHours">0 sa / 20 sa</b>
+                                </div>
+                            </div>
+                            <div class="card-box">
+                                <h3>📊 Seri Bilgileri</h3>
+                                <p>Güncel Seri: <b id="currentStreak">0 gün</b></p>
+                                <p>Toplam Kayıt: <b id="totalDays">0 gün</b></p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Telefon Numarası</label>
-                            <input type="tel" id="regPhone" placeholder="05XXXXXXXXX" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Sınıf</label>
-                            <select id="regGrade" required>
-                                <option value="">Sınıf Seçiniz</option>
-                                <option value="9">9. Sınıf</option>
-                                <option value="10">10. Sınıf</option>
-                                <option value="11">11. Sınıf</option>
-                                <option value="12">12. Sınıf</option>
-                                <option value="Mezun">Mezun</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Şifre Oluştur</label>
-                            <input type="password" id="regPassword" placeholder="********" required>
-                        </div>
-                        <button type="submit" class="btn-submit">Kayıt Ol</button>
-                    </form>
+                    </div>
+                </div>
 
-                    <div class="auth-links">
-                        <a href="javascript:void(0)" onclick="openLogin()">Zaten hesabın var mı? Giriş Yap</a>
+                <!-- ÇALIŞMA TAKVİMİ (CALENDAR VIEW) -->
+                <div id="calendarView" class="view-section" style="display: none;">
+                    <div class="content-header">
+                        <h2>📅 Çalışma Takvimi</h2>
+                        <p>Çalışma yaptığın günler yeşil renkle işaretlenir.</p>
+                    </div>
+                    <div class="calendar-grid-card">
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Takvim günleri JS ile doldurulacak -->
+                        </div>
                     </div>
                 </div>
 
