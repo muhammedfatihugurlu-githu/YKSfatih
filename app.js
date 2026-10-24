@@ -1,6 +1,6 @@
 // Firebase Yapılandırması
 const firebaseConfig = {
-    databaseURL: "https://fetih-social-default-rtdb.firebaseio.com"
+    databaseURL: "https://fetih-social-default-rtdb.firebaseio.com/"
 };
 
 if (!firebase.apps.length) {
