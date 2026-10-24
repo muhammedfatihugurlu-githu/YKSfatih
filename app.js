@@ -15,7 +15,7 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 let currentMetric = 'soru'; 
-let currentCalendarDate = new Date(); // Dinamik takvim ayı için
+let currentCalendarDate = new Date();
 
 function switchTab(viewId) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
@@ -26,6 +26,7 @@ function switchTab(viewId) {
 
     if (viewId === 'graphicsView') loadChartData();
     if (viewId === 'calendarView') loadCalendarGrid();
+    if (viewId === 'reportsView') loadReportsTable();
 }
 
 function openRegister() {
@@ -81,7 +82,6 @@ function logoutUser() {
     auth.signOut();
 }
 
-// Bilgi Girişi (Ders Seçimi Kaldırılmış Sade Hali)
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -278,13 +278,11 @@ function loadChartData() {
     });
 }
 
-// Takvim Ay Değiştirme
 function changeCalendarMonth(offset) {
     currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
     loadCalendarGrid();
 }
 
-// Takvim Kutularını Çizme (Herhangi bir kayıt yapılmışsa YEŞİL gösterir)
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -311,7 +309,6 @@ function loadCalendarGrid() {
             div.className = 'cal-day';
             div.innerText = day;
 
-            // Kayıt yapılmış tüm günler (çalışılsa da "Bugün çalışmadım" seçilse de) YEŞİL renkte görünür
             if (data[dateStr]) {
                 div.classList.add('worked');
             }
@@ -323,7 +320,46 @@ function loadCalendarGrid() {
     });
 }
 
-// Seri Hesaplama (Giriş Yapılan Tüm Günler Seriyi Korur)
+// Tüm Çalışma Kayıtları Tablosunu Doldurma
+function loadReportsTable() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
+        const data = snapshot.val() || {};
+        const tbody = document.getElementById('reportsTableBody');
+        tbody.innerHTML = '';
+
+        // Tarihe göre tersten sırala (en yeniler üstte)
+        const sortedDates = Object.keys(data).sort().reverse();
+
+        if (sortedDates.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b;">Henüz bir çalışma kaydı bulunmuyor.</td></tr>`;
+            return;
+        }
+
+        sortedDates.forEach(dateStr => {
+            const entry = data[dateStr];
+            const totalHours = entry.sure || 0;
+            const hours = Math.floor(totalHours);
+            const minutes = Math.round((totalHours - hours) * 60);
+
+            // Tarih formatını gg.aa.yyyy yapalım
+            const parts = dateStr.split('-');
+            const formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${entry.soru || 0}</td>
+                <td>${hours} saat ${minutes} dk</td>
+                <td>${entry.sayfa || 0}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
 function calculateStreaks(entries) {
     let bestStreak = 0;
     let tempStreak = 0;
@@ -339,7 +375,6 @@ function calculateStreaks(entries) {
         return;
     }
 
-    // 1. En İyi Seri Hesaplama
     for (let i = 0; i < registeredDates.length; i++) {
         if (i === 0) {
             tempStreak = 1;
@@ -361,7 +396,6 @@ function calculateStreaks(entries) {
         }
     }
 
-    // 2. Güncel Seri Hesaplama (Bugün veya Dünden Başlayarak)
     let currentStreak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -395,4 +429,4 @@ function calculateStreaks(entries) {
     document.getElementById('currentStreakVal').innerText = currentStreak;
     document.getElementById('bestStreakVal').innerText = bestStreak;
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
-}
+} 

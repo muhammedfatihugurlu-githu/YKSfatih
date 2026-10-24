@@ -20,6 +20,7 @@
             <nav>
                 <a href="#" onclick="switchTab('graphicsView')" class="active" title="Çalışma Grafiği"><i class="fa-solid fa-chart-line"></i></a>
                 <a href="#" onclick="switchTab('calendarView')" title="Çalışma Takvimi"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="#" onclick="switchTab('reportsView')" title="Tüm Çalışma Kayıtları"><i class="fa-solid fa-table-list"></i></a>
                 <a href="#" onclick="switchTab('createView')" title="Bilgi Girişi"><i class="fa-solid fa-pen-to-square"></i></a>
                 <a href="#" onclick="logoutUser()" title="Çıkış Yap"><i class="fa-solid fa-right-from-bracket"></i></a>
             </nav>
@@ -166,7 +167,6 @@
                 <!-- ÇALIŞMA TAKVİMİ -->
                 <div id="calendarView" class="view-section" style="display: none;">
                     <div class="calendar-layout">
-                        <!-- SOL: Takvim Ana Kartı -->
                         <div class="calendar-main-card">
                             <div class="calendar-header-info">
                                 <h3>📅 Çalışma Takvimi</h3>
@@ -186,7 +186,6 @@
                             </div>
                         </div>
 
-                        <!-- SAĞ: Seri Bilgileri Kartları -->
                         <div class="streak-side-cards">
                             <div class="streak-card">
                                 <div class="streak-title">🔥 Seri Bilgileri</div>
@@ -209,6 +208,32 @@
                                     <span class="streak-label">Toplam giriş günü</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TÜM ÇALIŞMA KAYITLARI (REPORTS VIEW) -->
+                <div id="reportsView" class="view-section" style="display: none;">
+                    <div class="reports-card">
+                        <div class="content-header">
+                            <h2>Tüm Çalışma Kayıtları</h2>
+                            <p>Geçmiş tüm çalışma ve soru kayıtlarını buradan inceleyebilirsin.</p>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="reports-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Soru</th>
+                                        <th>Saat</th>
+                                        <th>Sayfa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsTableBody">
+                                    <!-- JS ile doldurulacak -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
