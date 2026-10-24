@@ -46,7 +46,6 @@ auth.onAuthStateChanged(user => {
         document.getElementById('dashboardSection').style.display = 'block';
         document.getElementById('appSidebar').style.display = 'flex';
         
-        // Kullanıcı Profili Yükle
         loadUserProfile(user);
         loadChartData();
     } else {
@@ -94,6 +93,7 @@ function logoutUser() {
     auth.signOut();
 }
 
+// Bilgi Girişi ve Sınır Kontrolleri
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -104,11 +104,26 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
     const pages = Number(document.getElementById('studyPages').value) || 0;
     const hours = Number(document.getElementById('studyHours').value) || 0;
     const minutes = Number(document.getElementById('studyMinutes').value) || 0;
+    const totalHours = hours + (minutes / 60);
+
+    // Değer Sınır Kontrolleri
+    if (questions > 1000) {
+        alert("Günlük en fazla 1000 soru girebilirsin! 🛑");
+        return;
+    }
+    if (pages > 500) {
+        alert("Günlük en fazla 500 sayfa kitap okuyabilirsin! 🛑");
+        return;
+    }
+    if (totalHours > 16) {
+        alert("Günlük çalışma süresi en fazla 16 saat olabilir! 🛑");
+        return;
+    }
 
     const entryData = {
         soru: questions,
         sayfa: pages,
-        sure: hours + (minutes / 60),
+        sure: totalHours,
         timestamp: Date.now()
     };
 
@@ -441,34 +456,14 @@ function calculateStreaks(entries) {
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
 } 
 
-// Oturum açıldığında o anki kullanıcının veritabanındaki ismini çek
-auth.onAuthStateChanged(user => {
-    if (user) {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
-        document.getElementById('appSidebar').style.display = 'flex';
-        
-        // Giriş yapan kullanıcının kendi UID'sine göre ismini yüklüyoruz
-        loadUserProfile(user);
-        loadChartData();
-    } else {
-        document.getElementById('authSection').style.display = 'flex';
-        document.getElementById('dashboardSection').style.display = 'none';
-        document.getElementById('appSidebar').style.display = 'none';
-    }
-});
-
-// Herkesin kendi kaydettiği ismi Firebase'den dinamik olarak getiren fonksiyon
 function loadUserProfile(user) {
     if (!user) return;
 
     db.ref(`users/${user.uid}/profile`).once('value', snapshot => {
         const profile = snapshot.val();
         if (profile && profile.isim) {
-            // Veritabanında kayıtlı olan gerçek ismi yazdırır
             document.getElementById('welcomeUserName').innerText = profile.isim;
         } else {
-            // Eğer profil verisi henüz oluşmadıysa e-postasının başını yazar
             document.getElementById('welcomeUserName').innerText = user.email ? user.email.split('@')[0] : "Öğrenci";
         }
     });

@@ -379,7 +379,7 @@ body {
     margin-top: 6px;
 }
 
-/* Tüm Çalışma Kayıtları Tablosu (Sade, Temiz, Renksiz/Kırmızı-Sarı Yok) */
+/* Tüm Çalışma Kayıtları Tablosu */
 .reports-card {
     background: white;
     padding: 30px;
@@ -462,7 +462,6 @@ body {
     font-weight: 800;
     color: #14532d;
     margin-bottom: 4px;
-    text-transform: uppercase;
 }
 
 .welcome-text p {
@@ -475,22 +474,20 @@ body {
    MOBİL İÇİN RESPONSIVE (DUYARLI) DÜZEN
    ========================================== */
 @media (max-width: 768px) {
-    /* Ana Konteyner Düzeni */
     body {
-        overflow-y: auto; /* Mobilde dikey kaydırmaya izin ver */
+        overflow-y: auto;
     }
 
     .container {
         flex-direction: column;
         height: auto;
-        padding-bottom: 80px; /* Alt menünün içeriği kapatmaması için boşluk */
+        padding-bottom: 80px;
     }
 
     .main-content {
-        padding: 16px; /* Mobilde kenar boşluklarını küçült */
+        padding: 16px;
     }
 
-    /* Sol Menüyü Alt Menüye Dönüştürme (Bottom Navigation) */
     .sidebar {
         position: fixed;
         bottom: 0;
@@ -506,7 +503,6 @@ body {
         border-radius: 20px 20px 0 0;
     }
 
-    /* Mobilde Sol Üstteki 'Y' Logosunu Gizle */
     .sidebar .logo-box {
         display: none !important;
     }
@@ -524,7 +520,6 @@ body {
         font-size: 18px;
     }
 
-    /* Hoş Geldin Bannerı Düzenlemeleri */
     .welcome-banner {
         padding: 16px 20px;
         gap: 14px;
@@ -544,9 +539,8 @@ body {
         font-size: 12px;
     }
 
-    /* Takvim ve Seri Kartlarını Alt Alta Getirme */
     .calendar-layout {
-        grid-template-columns: 1fr; /* İki sütunu tek sütuna düşürür */
+        grid-template-columns: 1fr;
         gap: 16px;
     }
 
@@ -564,7 +558,6 @@ body {
         font-size: 12px;
     }
 
-    /* Grafik Kartı Mobil Düzen */
     .graphics-full-card {
         padding: 18px;
     }
@@ -580,10 +573,9 @@ body {
     }
 
     .chart-box-full {
-        height: 280px; /* Grafik yüksekliğini mobilde biraz küçült */
+        height: 280px;
     }
 
-    /* Tablo ve Form Kartları Mobil Düzen */
     .reports-card, .form-card {
         padding: 20px 16px;
     }
