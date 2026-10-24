@@ -297,6 +297,7 @@ function changeCalendarMonth(offset) {
     loadCalendarGrid();
 }
 
+// Takvim Kutularını Çizme (Herhangi bir kayıt yapılmışsa yeşil gösterir)
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -323,12 +324,9 @@ function loadCalendarGrid() {
             div.className = 'cal-day';
             div.innerText = day;
 
+            // Herhangi bir veri/kayıt varsa (Çalışılsa da "Bugün çalışmadım" dense de) YEŞİL yapıyoruz
             if (data[dateStr]) {
-                if (!data[dateStr].calismadi && (data[dateStr].soru > 0 || data[dateStr].sure > 0)) {
-                    div.classList.add('worked');
-                } else {
-                    div.classList.add('missed');
-                }
+                div.classList.add('worked');
             }
 
             grid.appendChild(div);
@@ -338,40 +336,38 @@ function loadCalendarGrid() {
     });
 }
 
+// Seri Hesaplama (Sisteme kayıt girilen HER GÜN seriyi korur)
 function calculateStreaks(entries) {
     let bestStreak = 0;
     let tempStreak = 0;
     let totalWorkedDays = 0;
 
-    // Çalışma yapılan günleri filtrele (yyyy-mm-dd formatında)
-    const workedDates = Object.keys(entries).filter(dateKey => {
-        const entry = entries[dateKey];
-        return !entry.calismadi && (entry.soru > 0 || entry.sure > 0 || entry.sayfa > 0);
-    }).sort(); // Tarihleri kronolojik sıraya diz
+    // Sisteme kayıt yapılmış tüm tarihleri alıp sıralıyoruz
+    const registeredDates = Object.keys(entries).sort();
 
-    totalWorkedDays = workedDates.length;
+    totalWorkedDays = registeredDates.length;
 
-    if (workedDates.length === 0) {
+    if (registeredDates.length === 0) {
         document.getElementById('currentStreakVal').innerText = 0;
         document.getElementById('bestStreakVal').innerText = 0;
         document.getElementById('totalDaysVal').innerText = 0;
         return;
     }
 
-    // 1. En İyi Seriyi Hesaplama (Tüm zamanların en uzun ardışık serisi)
-    for (let i = 0; i < workedDates.length; i++) {
+    // 1. En İyi Seri Hesaplama (Kayıt girilmiş tüm ardışık günler)
+    for (let i = 0; i < registeredDates.length; i++) {
         if (i === 0) {
             tempStreak = 1;
         } else {
-            const prevDate = new Date(workedDates[i - 1]);
-            const currDate = new Date(workedDates[i]);
+            const prevDate = new Date(registeredDates[i - 1]);
+            const currDate = new Date(registeredDates[i]);
             const diffTime = Math.abs(currDate - prevDate);
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                tempStreak++; // Ardışık gün
+                tempStreak++;
             } else {
-                tempStreak = 1; // Seri kırıldı, baştan başla
+                tempStreak = 1;
             }
         }
 
@@ -380,7 +376,7 @@ function calculateStreaks(entries) {
         }
     }
 
-    // 2. Güncel Seriyi Hesaplama (Bugün veya Dünden başlayarak geriye doğru)
+    // 2. Güncel Seri Hesaplama (Bugün veya dünden geriye doğru kayıt girilmiş gün dizisi)
     let currentStreak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -388,12 +384,11 @@ function calculateStreaks(entries) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    // En son çalışılan günü al
-    const lastWorkedDateStr = workedDates[workedDates.length - 1];
+    const lastWorkedDateStr = registeredDates[registeredDates.length - 1];
     const lastWorkedDate = new Date(lastWorkedDateStr);
     lastWorkedDate.setHours(0, 0, 0, 0);
 
-    // Güncel serinin aktif sayılması için en son kayıt Bugün veya Dün yapılmış olmalı
+    // Son kayıt Bugün veya Dün ise güncel seri aktiftir
     if (lastWorkedDate.getTime() === today.getTime() || lastWorkedDate.getTime() === yesterday.getTime()) {
         let checkDate = new Date(lastWorkedDate);
 
@@ -402,19 +397,17 @@ function calculateStreaks(entries) {
             const dStr = String(checkDate.getDate()).padStart(2, '0');
             const dateStr = `${checkDate.getFullYear()}-${mStr}-${dStr}`;
 
-            if (workedDates.includes(dateStr)) {
+            if (registeredDates.includes(dateStr)) {
                 currentStreak++;
-                // Bir önceki güne git
                 checkDate.setDate(checkDate.getDate() - 1);
             } else {
-                break; // Ardışık gün bitti
+                break;
             }
         }
     } else {
-        currentStreak = 0; // Son kayıt bugün veya dün değilse güncel seri sıfırlanır
+        currentStreak = 0;
     }
 
-    // Ekrandaki değerleri güncelle
     document.getElementById('currentStreakVal').innerText = currentStreak;
     document.getElementById('bestStreakVal').innerText = bestStreak;
     document.getElementById('totalDaysVal').innerText = totalWorkedDays;
