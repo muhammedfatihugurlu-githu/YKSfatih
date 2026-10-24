@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Takip - Giriş / Kayıt</title>
+    <title>YKS Takip</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDK (Compat Sürümleri) -->
+    <!-- FontAwesome İkonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -13,16 +15,19 @@
 <body>
 
     <div class="container">
-        <!-- Sol Modern Sidebar -->
+        <!-- Sol İkonik Sidebar (bahadirunal.com tarzı) -->
         <aside class="sidebar">
-            <div class="logo">🚀 YKS Takip</div>
+            <div class="logo-box">Y</div>
             <nav>
-                <a href="#" class="active">Giriş / Kayıt</a>
+                <a href="#" class="active" title="Giriş / Kayıt"><i class="fa-solid fa-user"></i></a>
+                <a href="#" title="Grafikler"><i class="fa-solid fa-chart-line"></i></a>
+                <a href="#" title="Haftalık Plan"><i class="fa-solid fa-calendar-days"></i></a>
+                <a href="#" title="Mesajlar"><i class="fa-solid fa-envelope"></i></a>
             </nav>
         </aside>
 
-        <!-- Ana İçerik Alanı -->
-        <main class="main-content auth-container">
+        <!-- Ana İçerik -->
+        <main class="main-content">
             <div class="auth-card">
                 
                 <!-- GİRİŞ YAP FORMU -->
@@ -33,13 +38,13 @@
                     <form id="loginForm">
                         <div class="form-group">
                             <label>E-posta</label>
-                            <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
+                            <input type="email" id="loginEmail" placeholder="ornek@mail.com" required>
                         </div>
                         <div class="form-group">
                             <label>Şifre</label>
-                            <input type="password" id="loginPassword" required placeholder="********">
+                            <input type="password" id="loginPassword" placeholder="********" required>
                         </div>
-                        <button type="submit" class="btn-save">Giriş Yap</button>
+                        <button type="submit" class="btn-submit">Giriş Yap</button>
                     </form>
 
                     <div class="auth-links">
@@ -47,27 +52,27 @@
                     </div>
                 </div>
 
-                <!-- KAYIT OL FORMU (Başlangıçta gizli) -->
+                <!-- KAYIT OL FORMU -->
                 <div id="registerFormSection" style="display: none;">
                     <h2>Kayıt Ol</h2>
-                    <p class="auth-desc">Bilgilerini doldurarak hemen aramıza katıl.</p>
+                    <p class="auth-desc">Aramıza katılmak için bilgilerini gir.</p>
                     
                     <form id="registerForm">
                         <div class="form-group">
                             <label>Ad Soyad</label>
-                            <input type="text" id="regName" required placeholder="Adın Soyadın">
+                            <input type="text" id="regName" placeholder="Ad Soyad" required>
                         </div>
                         <div class="form-group">
                             <label>E-posta</label>
-                            <input type="email" id="regEmail" required placeholder="ornek@mail.com">
+                            <input type="email" id="regEmail" placeholder="ornek@mail.com" required>
                         </div>
                         <div class="form-group">
                             <label>Telefon Numarası</label>
-                            <input type="tel" id="regPhone" required placeholder="05XXXXXXXXX">
+                            <input type="tel" id="regPhone" placeholder="05XXXXXXXXX" required>
                         </div>
                         <div class="form-group">
-                            <label>Kaçıncı Sınıf?</label>
-                            <select id="regGrade" class="form-input" required>
+                            <label>Sınıf</label>
+                            <select id="regGrade" required>
                                 <option value="">Sınıf Seçiniz</option>
                                 <option value="9">9. Sınıf</option>
                                 <option value="10">10. Sınıf</option>
@@ -77,10 +82,10 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Şifre Oluştur</label>
-                            <input type="password" id="regPassword" required placeholder="********">
+                            <label>Şifre</label>
+                            <input type="password" id="regPassword" placeholder="********" required>
                         </div>
-                        <button type="submit" class="btn-save">Kayıt Ol</button>
+                        <button type="submit" class="btn-submit">Kayıt Ol</button>
                     </form>
 
                     <div class="auth-links">
