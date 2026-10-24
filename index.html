@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YKS Takip</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sol Menü -->
+        <aside class="sidebar">
+            <div class="logo">YKS</div>
+            <nav>
+                <a href="#" class="active">🏠 Panel</a>
+                <a href="#kayit">📝 Günlük Kayıt</a>
+                <a href="#raporlar">📊 Raporlar</a>
+            </nav>
+        </aside>
+
+        <!-- Ana İçerik -->
+        <main class="main-content">
+            <!-- Karşılama Kartı -->
+            <header class="welcome-card">
+                <p>HOŞ GELDİN</p>
+                <h1>MUHAMMED FATİH UĞURLU</h1>
+            </header>
+
+            <!-- Özet Kartları -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="questionCount">0 / 500</h3>
+                    <p>Soru Çözme</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="studyTime">0 / 200 dk</h3>
+                    <p>Çalışma Süresi</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pageCount">0 / 150</h3>
+                    <p>Sayfa Okuma</p>
+                </div>
+            </section>
+
+            <!-- Hızlı Kayıt Formu -->
+            <section id="kayit" class="form-section">
+                <h3>Bugünkü Çalışmanı Hızlıca Ekle</h3>
+                <form id="studyForm">
+                    <div class="form-group">
+                        <label>Tarih</label>
+                        <input type="date" id="dateInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Soru Sayısı</label>
+                        <input type="number" id="questionInput" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Çalışma Süresi (Dakika)</label>
+                        <input type="number" id="timeInput" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Okunan Sayfa</label>
+                        <input type="number" id="pageInput" placeholder="0">
+                    </div>
+                    <button type="submit" class="btn-save">Kaydet</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
