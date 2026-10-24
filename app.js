@@ -15,7 +15,8 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 let selectedLessons = [];
-let currentMetric = 'soru'; // Varsayılan: soru
+let currentMetric = 'soru'; 
+let currentCalendarDate = new Date(); // Dinamik takvim ayı için
 
 function switchTab(viewId) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
@@ -138,7 +139,6 @@ function setChartMetric(metric, btn) {
     loadChartData();
 }
 
-// Gelişmiş Grafik Çizimi (Negatif değerler kaldırıldı, Aylık/Yıllık ve Ortalama eklendi)
 let myChart = null;
 function loadChartData() {
     const user = auth.currentUser;
@@ -146,23 +146,17 @@ function loadChartData() {
 
     const range = document.getElementById('timeRangeSelect').value;
 
-    // Tüm kullanıcıların verilerini çekerek ortalama hesaplayacağız
     db.ref('users').once('value', snapshot => {
         const allUsersData = snapshot.val() || {};
-        const myData = allUsersData[user.uid]?.entries || {};
-
         let labels = [];
         let userValues = [];
         let avgValues = [];
 
         if (range === 'monthly') {
-            // AYLIK: Ocak, Şubat, Mart ... Aralık
             labels = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
             
             labels.forEach((_, monthIndex) => {
                 let mStr = String(monthIndex + 1).padStart(2, '0');
-                
-                // Kullanıcının bu aydaki toplamı
                 let uSum = 0;
                 let otherSum = 0;
                 let otherCount = 0;
@@ -180,9 +174,8 @@ function loadChartData() {
                         }
                     });
 
-                    if (uid === user.uid) {
-                        uSum = userMonthTotal;
-                    } else {
+                    if (uid === user.uid) uSum = userMonthTotal;
+                    else {
                         otherSum += userMonthTotal;
                         otherCount++;
                     }
@@ -193,7 +186,6 @@ function loadChartData() {
             });
 
         } else if (range === 'yearly') {
-            // YILLIK: 2025, 2026, 2027
             labels = ["2024", "2025", "2026", "2027"];
             
             labels.forEach(year => {
@@ -214,9 +206,8 @@ function loadChartData() {
                         }
                     });
 
-                    if (uid === user.uid) {
-                        uSum = userYearTotal;
-                    } else {
+                    if (uid === user.uid) uSum = userYearTotal;
+                    else {
                         otherSum += userYearTotal;
                         otherCount++;
                     }
@@ -227,7 +218,6 @@ function loadChartData() {
             });
 
         } else {
-            // Son 10 Gün veya Haftalık (Günlük bazlı)
             let count = (range === 'weekly') ? 7 : 10;
             
             for (let i = count - 1; i >= 0; i--) {
@@ -248,9 +238,8 @@ function loadChartData() {
                     else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
                     else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
 
-                    if (uid === user.uid) {
-                        uVal = val;
-                    } else {
+                    if (uid === user.uid) uVal = val;
+                    else {
                         otherSum += val;
                         otherCount++;
                     }
@@ -295,35 +284,79 @@ function loadChartData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: {
-                        beginAtZero: true // Eksi (-) değerleri tamamen engeller
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });
     });
 }
 
+// Takvim Ay Değiştirme ve Seri Hesaplama
+function changeCalendarMonth(offset) {
+    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
+    loadCalendarGrid();
+}
+
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
+
+    const year = currentCalendarDate.getFullYear();
+    const month = currentCalendarDate.getMonth();
+
+    const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+    document.getElementById('calendarMonthTitle').innerText = `${monthNames[month]} ${year}`;
 
     db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
         const data = snapshot.val() || {};
         const grid = document.getElementById('calendarGrid');
         grid.innerHTML = '';
 
-        const daysInMonth = 31;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
         for (let day = 1; day <= daysInMonth; day++) {
-            const dayStr = `2026-10-${day < 10 ? '0' + day : day}`;
+            const mStr = String(month + 1).padStart(2, '0');
+            const dStr = String(day).padStart(2, '0');
+            const dateStr = `${year}-${mStr}-${dStr}`;
+
             const div = document.createElement('div');
             div.className = 'cal-day';
             div.innerText = day;
 
-            if (data[dayStr] && !data[dayStr].calismadi && (data[dayStr].soru > 0 || data[dayStr].sure > 0)) {
-                div.classList.add('worked');
+            if (data[dateStr]) {
+                if (!data[dateStr].calismadi && (data[dateStr].soru > 0 || data[dateStr].sure > 0)) {
+                    div.classList.add('worked');
+                } else {
+                    div.classList.add('missed');
+                }
             }
+
             grid.appendChild(div);
         }
+
+        calculateStreaks(data);
     });
+}
+
+function calculateStreaks(entries) {
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let totalWorkedDays = 0;
+
+    const sortedDates = Object.keys(entries).sort();
+
+    sortedDates.forEach(dateKey => {
+        const entry = entries[dateKey];
+        if (!entry.calismadi && (entry.soru > 0 || entry.sure > 0)) {
+            totalWorkedDays++;
+            currentStreak++;
+            if (currentStreak > bestStreak) bestStreak = currentStreak;
+        } else {
+            currentStreak = 0;
+        }
+    });
+
+    document.getElementById('currentStreakVal').innerText = currentStreak;
+    document.getElementById('bestStreakVal').innerText = bestStreak;
+    document.getElementById('totalDaysVal').innerText = totalWorkedDays;
 }

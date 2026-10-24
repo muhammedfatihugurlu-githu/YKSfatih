@@ -156,7 +156,6 @@
                                 <h2>Çalışma Grafiği</h2>
                                 <p class="subtitle">Senin değerlerin ve grafiksel analizin.</p>
                             </div>
-                            <!-- Periyot Seçim Dropdown -->
                             <select id="timeRangeSelect" class="time-select" onchange="loadChartData()">
                                 <option value="10days">Son 10 Gün</option>
                                 <option value="weekly">Haftalık</option>
@@ -165,7 +164,6 @@
                             </select>
                         </div>
 
-                        <!-- Soru, Kitap, Çalışma Filtre Butonları -->
                         <div class="chart-filter-tabs">
                             <button class="filter-btn active" onclick="setChartMetric('soru', this)">SORU</button>
                             <button class="filter-btn" onclick="setChartMetric('kitap', this)">KİTAP</button>
@@ -178,14 +176,53 @@
                     </div>
                 </div>
 
-                <!-- ÇALIŞMA TAKVİMİ -->
+                <!-- ÇALIŞMA TAKVİMİ (YENİLENMİŞ KOMPAKT DÜZEN) -->
                 <div id="calendarView" class="view-section" style="display: none;">
-                    <div class="content-header">
-                        <h2>📅 Çalışma Takvimi</h2>
-                        <p>Çalışma yaptığın günler yeşil renkle işaretlenir.</p>
-                    </div>
-                    <div class="calendar-grid-card">
-                        <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="calendar-layout">
+                        <!-- SOL: Takvim Ana Kartı -->
+                        <div class="calendar-main-card">
+                            <div class="calendar-header-info">
+                                <h3>📅 Çalışma Takvimi</h3>
+                                <p>Çalışma yaptığın günler yeşil renkle işaretlenir.</p>
+                            </div>
+
+                            <div class="calendar-controls">
+                                <span class="current-month-text" id="calendarMonthTitle">Ekim 2026</span>
+                                <div class="month-nav-btns">
+                                    <button type="button" class="nav-btn" onclick="changeCalendarMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                                    <button type="button" class="nav-btn" onclick="changeCalendarMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="calendar-grid-wrapper">
+                                <div class="calendar-grid" id="calendarGrid"></div>
+                            </div>
+                        </div>
+
+                        <!-- SAĞ: Seri Bilgileri Kartları -->
+                        <div class="streak-side-cards">
+                            <div class="streak-card">
+                                <div class="streak-title">🔥 Seri Bilgileri</div>
+                                <div class="streak-box">
+                                    <span class="streak-number" id="currentStreakVal">0</span>
+                                    <span class="streak-label">Güncel seri</span>
+                                </div>
+                            </div>
+
+                            <div class="streak-card">
+                                <div class="streak-box">
+                                    <span class="streak-number" id="bestStreakVal">0</span>
+                                    <span class="streak-label">En iyi seri</span>
+                                </div>
+                            </div>
+
+                            <div class="streak-card">
+                                <div class="streak-box">
+                                    <span class="streak-number" id="totalDaysVal">0</span>
+                                    <span class="streak-label">Toplam giriş günü</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
