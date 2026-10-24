@@ -15,7 +15,7 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 let selectedLessons = [];
-let currentMetric = 'soru'; // Varsayılan filtre: soru
+let currentMetric = 'soru'; // Varsayılan: soru
 
 function switchTab(viewId) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
@@ -131,7 +131,6 @@ function markAsNotStudied() {
         .then(() => alert("Bugün çalışılmadı olarak işaretlendi."));
 }
 
-// Grafik Metrik Değişimi (SORU, KİTAP, ÇALIŞMA)
 function setChartMetric(metric, btn) {
     currentMetric = metric;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -139,51 +138,126 @@ function setChartMetric(metric, btn) {
     loadChartData();
 }
 
-// Gelişmiş Grafik Çizimi (Son 10 Gün, Haftalık, Aylık, Yıllık)
+// Gelişmiş Grafik Çizimi (Negatif değerler kaldırıldı, Aylık/Yıllık ve Ortalama eklendi)
 let myChart = null;
 function loadChartData() {
     const user = auth.currentUser;
     if (!user) return;
 
     const range = document.getElementById('timeRangeSelect').value;
-    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
-        const data = snapshot.val() || {};
+
+    // Tüm kullanıcıların verilerini çekerek ortalama hesaplayacağız
+    db.ref('users').once('value', snapshot => {
+        const allUsersData = snapshot.val() || {};
+        const myData = allUsersData[user.uid]?.entries || {};
+
         let labels = [];
-        let values = [];
+        let userValues = [];
+        let avgValues = [];
 
-        let count = 10;
-        if (range === 'weekly') count = 7;
-        else if (range === 'monthly') count = 30;
-        else if (range === 'yearly') count = 12; // AYLAR
-
-        for (let i = count - 1; i >= 0; i--) {
-            const d = new Date();
-            if (range === 'yearly') {
-                d.setMonth(d.getMonth() - i);
-                const monthStr = d.toLocaleString('tr-TR', { month: 'short' });
-                labels.push(monthStr);
+        if (range === 'monthly') {
+            // AYLIK: Ocak, Şubat, Mart ... Aralık
+            labels = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+            
+            labels.forEach((_, monthIndex) => {
+                let mStr = String(monthIndex + 1).padStart(2, '0');
                 
-                let monthTotal = 0;
-                Object.keys(data).forEach(dateKey => {
-                    if (dateKey.startsWith(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)) {
-                        if (currentMetric === 'soru') monthTotal += data[dateKey].soru || 0;
-                        if (currentMetric === 'kitap') monthTotal += data[dateKey].sayfa || 0;
-                        if (currentMetric === 'calisma') monthTotal += data[dateKey].sure || 0;
+                // Kullanıcının bu aydaki toplamı
+                let uSum = 0;
+                let otherSum = 0;
+                let otherCount = 0;
+
+                Object.keys(allUsersData).forEach(uid => {
+                    const entries = allUsersData[uid].entries || {};
+                    let userMonthTotal = 0;
+                    Object.keys(entries).forEach(dateKey => {
+                        if (dateKey.startsWith(`2026-${mStr}`)) {
+                            let val = 0;
+                            if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
+                            else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
+                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
+                            userMonthTotal += val;
+                        }
+                    });
+
+                    if (uid === user.uid) {
+                        uSum = userMonthTotal;
+                    } else {
+                        otherSum += userMonthTotal;
+                        otherCount++;
                     }
                 });
-                values.push(monthTotal);
-            } else {
+
+                userValues.push(uSum);
+                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uSum);
+            });
+
+        } else if (range === 'yearly') {
+            // YILLIK: 2025, 2026, 2027
+            labels = ["2024", "2025", "2026", "2027"];
+            
+            labels.forEach(year => {
+                let uSum = 0;
+                let otherSum = 0;
+                let otherCount = 0;
+
+                Object.keys(allUsersData).forEach(uid => {
+                    const entries = allUsersData[uid].entries || {};
+                    let userYearTotal = 0;
+                    Object.keys(entries).forEach(dateKey => {
+                        if (dateKey.startsWith(year)) {
+                            let val = 0;
+                            if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
+                            else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
+                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
+                            userYearTotal += val;
+                        }
+                    });
+
+                    if (uid === user.uid) {
+                        uSum = userYearTotal;
+                    } else {
+                        otherSum += userYearTotal;
+                        otherCount++;
+                    }
+                });
+
+                userValues.push(uSum);
+                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uSum);
+            });
+
+        } else {
+            // Son 10 Gün veya Haftalık (Günlük bazlı)
+            let count = (range === 'weekly') ? 7 : 10;
+            
+            for (let i = count - 1; i >= 0; i--) {
+                const d = new Date();
                 d.setDate(d.getDate() - i);
                 const dateStr = d.toISOString().split('T')[0];
                 labels.push(dateStr);
 
-                let val = 0;
-                if (data[dateStr]) {
-                    if (currentMetric === 'soru') val = data[dateStr].soru || 0;
-                    if (currentMetric === 'kitap') val = data[dateStr].sayfa || 0;
-                    if (currentMetric === 'calisma') val = data[dateStr].sure || 0;
-                }
-                values.push(val);
+                let uVal = 0;
+                let otherSum = 0;
+                let otherCount = 0;
+
+                Object.keys(allUsersData).forEach(uid => {
+                    const entries = allUsersData[uid].entries || {};
+                    const dayEntry = entries[dateStr] || {};
+                    let val = 0;
+                    if (currentMetric === 'soru') val = dayEntry.soru || 0;
+                    else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
+                    else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
+
+                    if (uid === user.uid) {
+                        uVal = val;
+                    } else {
+                        otherSum += val;
+                        otherCount++;
+                    }
+                });
+
+                userValues.push(uVal);
+                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uVal);
             }
         }
 
@@ -198,16 +272,34 @@ function loadChartData() {
             type: 'line',
             data: {
                 labels: labels,
-                datasets: [{
-                    label: labelName,
-                    data: values,
-                    borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
+                datasets: [
+                    {
+                        label: labelName,
+                        data: userValues,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Ortalama (Diğer Öğrenciler)',
+                        data: avgValues,
+                        borderColor: '#f59e0b',
+                        borderDash: [5, 5],
+                        backgroundColor: 'transparent',
+                        tension: 0.3
+                    }
+                ]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true // Eksi (-) değerleri tamamen engeller
+                    }
+                }
+            }
         });
     });
 }
