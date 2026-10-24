@@ -1,63 +1,83 @@
-// Firebase Veritabanı Bağlantı Adresi
+// Firebase Yapılandırması
 const firebaseConfig = {
     databaseURL: "https://fetih-social-default-rtdb.firebaseio.com"
 };
 
-// Firebase Başlatma
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const auth = firebase.auth();
 
-// Bugünün tarihini otomatik olarak tarih inputuna yaz
-const dateInput = document.getElementById('dateInput');
-const today = new Date().toISOString().split('T')[0];
-dateInput.value = today;
+// Form ve Bölüm Seçicileri
+const loginFormSection = document.getElementById('loginFormSection');
+const registerFormSection = document.getElementById('registerFormSection');
+const toRegisterBtn = document.getElementById('toRegister');
+const toLoginBtn = document.getElementById('toLogin');
 
-// Form Gönderildiğinde Veriyi Firebase'e Kaydetme
-const studyForm = document.getElementById('studyForm');
-studyForm.addEventListener('submit', (e) => {
+// Sekme Değiştirme (Giriş <-> Kayıt)
+toRegisterBtn.addEventListener('click', (e) => {
     e.preventDefault();
-
-    const date = document.getElementById('dateInput').value;
-    const question = Number(document.getElementById('questionInput').value) || 0;
-    const time = Number(document.getElementById('timeInput').value) || 0;
-    const page = Number(document.getElementById('pageInput').value) || 0;
-
-    // Tarihi anahtar yaparak Firebase'e kaydet (Örn: calismalar/20261024)
-    const dateKey = date.replace(/-/g, '');
-    
-    db.ref('calismalar/' + dateKey).set({
-        tarih: date,
-        soru: question,
-        sure: time,
-        sayfa: page
-    }, (error) => {
-        if (error) {
-            alert("Kayıt sırasında bir hata oluştu!");
-        } else {
-            alert("Çalışman başarıyla Firebase'e kaydedildi! 🚀");
-            studyForm.reset();
-            dateInput.value = today;
-            verileriCek();
-        }
-    });
+    loginFormSection.style.display = 'none';
+    registerFormSection.style.display = 'block';
 });
 
-// Firebase'den Bugünkü Verileri Çekip Ekranda Gösterme
-function verileriCek() {
-    const todayKey = today.replace(/-/g, '');
-    db.ref('calismalar/' + todayKey).on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            document.getElementById('questionCount').innerText = `${data.soru} / 500`;
-            document.getElementById('studyTime').innerText = `${data.sure} / 200 dk`;
-            document.getElementById('pageCount').innerText = `${data.sayfa} / 150`;
-        } else {
-            document.getElementById('questionCount').innerText = `0 / 500`;
-            document.getElementById('studyTime').innerText = `0 / 200 dk`;
-            document.getElementById('pageCount').innerText = `0 / 150`;
-        }
-    });
-}
+toLoginBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerFormSection.style.display = 'none';
+    loginFormSection.style.display = 'block';
+});
 
-// Sayfa açıldığında verileri yükle
-verileriCek();
+// KAYIT OLMA İŞLEMİ
+const registerForm = document.getElementById('registerForm');
+registerForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const phone = document.getElementById('regPhone').value;
+    const grade = document.getElementById('regGrade').value;
+    const password = document.getElementById('regPassword').value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            
+            // Ek bilgileri Realtime Database içerisine kaydedelim
+            db.ref('users/' + user.uid).set({
+                isim: name,
+                eposta: email,
+                telefon: phone,
+                sinif: grade
+            }, (error) => {
+                if (error) {
+                    alert("Kayıt veritabanına kaydedilemedi!");
+                } else {
+                    alert("Kayıt başarıyla oluşturuldu! Giriş yapabilirsiniz.");
+                    registerForm.reset();
+                    registerFormSection.style.display = 'none';
+                    loginFormSection.style.display = 'block';
+                }
+            });
+        })
+        .catch((error) => {
+            alert("Kayıt Hatası: " + error.message);
+        });
+});
+
+// GİRİŞ YAPMA İŞLEMİ
+const loginForm = document.getElementById('loginForm');
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            alert("Başarıyla giriş yapıldı! YKS takip paneline yönlendiriliyorsunuz... 🚀");
+            // Giriş başarılı olunca ana takip paneline yönlendirme yapabilirsin
+            // Örn: window.location.href = "dashboard.html";
+        })
+        .catch((error) => {
+            alert("Giriş Başarısız: E-posta veya şifre hatalı!");
+        });
+});

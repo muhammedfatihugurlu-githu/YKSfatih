@@ -3,74 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YKS Takip</title>
+    <title>YKS Takip - Giriş / Kayıt</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK (Compat Sürümleri) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
+
     <div class="container">
-        <!-- Sol Menü -->
+        <!-- Sol Modern Sidebar -->
         <aside class="sidebar">
-            <div class="logo">YKS</div>
+            <div class="logo">🚀 YKS Takip</div>
             <nav>
-                <a href="#" class="active">🏠 Panel</a>
-                <a href="#kayit">📝 Günlük Kayıt</a>
-                <a href="#raporlar">📊 Raporlar</a>
+                <a href="#" class="active">Giriş / Kayıt</a>
             </nav>
         </aside>
 
-        <!-- Ana İçerik -->
-        <main class="main-content">
-            <!-- Karşılama Kartı -->
-            <header class="welcome-card">
-                <p>HOŞ GELDİN</p>
-                <h1>MUHAMMED FATİH UĞURLU</h1>
-            </header>
+        <!-- Ana İçerik Alanı -->
+        <main class="main-content auth-container">
+            <div class="auth-card">
+                
+                <!-- GİRİŞ YAP FORMU -->
+                <div id="loginFormSection">
+                    <h2>Giriş Yap</h2>
+                    <p class="auth-desc">Artık e-posta ve şifre ile giriş yapabilirsiniz.</p>
+                    
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>E-posta</label>
+                            <input type="email" id="loginEmail" required placeholder="ornek@mail.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre</label>
+                            <input type="password" id="loginPassword" required placeholder="********">
+                        </div>
+                        <button type="submit" class="btn-save">Giriş Yap</button>
+                    </form>
 
-            <!-- Özet Kartları -->
-            <section class="stats-grid">
-                <div class="stat-card">
-                    <h3 id="questionCount">0 / 500</h3>
-                    <p>Soru Çözme</p>
+                    <div class="auth-links">
+                        <a href="#" id="toRegister">Hesabın yok mu? Kayıt Ol</a>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3 id="studyTime">0 / 200 dk</h3>
-                    <p>Çalışma Süresi</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="pageCount">0 / 150</h3>
-                    <p>Sayfa Okuma</p>
-                </div>
-            </section>
 
-            <!-- Hızlı Kayıt Formu -->
-            <section id="kayit" class="form-section">
-                <h3>Bugünkü Çalışmanı Hızlıca Ekle</h3>
-                <form id="studyForm">
-                    <div class="form-group">
-                        <label>Tarih</label>
-                        <input type="date" id="dateInput" required>
+                <!-- KAYIT OL FORMU (Başlangıçta gizli) -->
+                <div id="registerFormSection" style="display: none;">
+                    <h2>Kayıt Ol</h2>
+                    <p class="auth-desc">Bilgilerini doldurarak hemen aramıza katıl.</p>
+                    
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label>Ad Soyad</label>
+                            <input type="text" id="regName" required placeholder="Adın Soyadın">
+                        </div>
+                        <div class="form-group">
+                            <label>E-posta</label>
+                            <input type="email" id="regEmail" required placeholder="ornek@mail.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefon Numarası</label>
+                            <input type="tel" id="regPhone" required placeholder="05XXXXXXXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Kaçıncı Sınıf?</label>
+                            <select id="regGrade" class="form-input" required>
+                                <option value="">Sınıf Seçiniz</option>
+                                <option value="9">9. Sınıf</option>
+                                <option value="10">10. Sınıf</option>
+                                <option value="11">11. Sınıf</option>
+                                <option value="12">12. Sınıf</option>
+                                <option value="Mezun">Mezun</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre Oluştur</label>
+                            <input type="password" id="regPassword" required placeholder="********">
+                        </div>
+                        <button type="submit" class="btn-save">Kayıt Ol</button>
+                    </form>
+
+                    <div class="auth-links">
+                        <a href="#" id="toLogin">Zaten hesabın var mı? Giriş Yap</a>
                     </div>
-                    <div class="form-group">
-                        <label>Soru Sayısı</label>
-                        <input type="number" id="questionInput" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Çalışma Süresi (Dakika)</label>
-                        <input type="number" id="timeInput" placeholder="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Okunan Sayfa</label>
-                        <input type="number" id="pageInput" placeholder="0">
-                    </div>
-                    <button type="submit" class="btn-save">Kaydet</button>
-                </form>
-            </section>
+                </div>
+
+            </div>
         </main>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

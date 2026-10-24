@@ -1,109 +1,62 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-body {
-    background-color: #f4f6f9;
-    color: #333;
-}
-
-.container {
+/* Auth Sayfası Özel Stilleri */
+.auth-container {
     display: flex;
-    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8fafc;
 }
 
-/* Sol Menü (Sidebar) */
-.sidebar {
-    width: 240px;
-    background-color: #4f46e5;
-    color: white;
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-}
-
-.sidebar .logo {
-    font-size: 24px;
-    font-weight: bold;
-    padding-left: 12px;
-}
-
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.sidebar nav a {
-    color: #e0e7ff;
-    text-decoration: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.sidebar nav a:hover,
-.sidebar nav a.active {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
-}
-
-/* Ana İçerik */
-.main-content {
-    flex: 1;
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-/* Karşılama Kartı */
-.welcome-card {
-    background: #ffe4e6;
-    border: 1px solid #fecdd3;
-    padding: 20px 24px;
-    border-radius: 12px;
-    color: #9f1239;
-}
-
-.welcome-card p {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.welcome-card h1 {
-    font-size: 22px;
-    margin-top: 4px;
-}
-
-/* Özet Kartları */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-}
-
-.stat-card {
+.auth-card {
     background: white;
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 36px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-card h2 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.auth-desc {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.auth-card .form-group {
+    margin-bottom: 16px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: white;
+}
+
+.form-input:focus {
+    border-color: #4f46e5;
+}
+
+.auth-links {
+    margin-top: 20px;
     text-align: center;
 }
 
-.stat-card h3 {
-    font-size: 24px;
-    color: #1e293b;
-    margin-bottom: 8px;
+.auth-links a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
 }
 
-.stat-card p {
-    color: #64748b;
-    font-size: 14px;
+.auth-links a:hover {
+    text-decoration: underline;
 }
