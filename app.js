@@ -27,6 +27,7 @@ function switchTab(viewId) {
     if (viewId === 'graphicsView') loadChartData();
     if (viewId === 'calendarView') loadCalendarGrid();
     if (viewId === 'reportsView') loadReportsTable();
+    if (viewId === 'profileView') loadProfileData();
 }
 
 function openRegister() {
@@ -55,6 +56,7 @@ auth.onAuthStateChanged(user => {
     }
 });
 
+// Kayıt Olma (Şifre veritabanına da kaydedilir ki profilde görüntülenebilsin)
 document.getElementById('registerForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('regName').value;
@@ -70,7 +72,8 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
                 isim: name, 
                 eposta: email, 
                 telefon: phone, 
-                sinif: grade 
+                sinif: grade,
+                sifre: password
             });
         })
         .then(() => {
@@ -106,7 +109,6 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
     const minutes = Number(document.getElementById('studyMinutes').value) || 0;
     const totalHours = hours + (minutes / 60);
 
-    // Değer Sınır Kontrolleri
     if (questions > 1000) {
         alert("Günlük en fazla 1000 soru girebilirsin! 🛑");
         return;
@@ -347,7 +349,6 @@ function loadCalendarGrid() {
     });
 }
 
-// Tüm Çalışma Kayıtları Tablosunu Doldurma
 function loadReportsTable() {
     const user = auth.currentUser;
     if (!user) return;
@@ -467,4 +468,33 @@ function loadUserProfile(user) {
             document.getElementById('welcomeUserName').innerText = user.email ? user.email.split('@')[0] : "Öğrenci";
         }
     });
+}
+
+// Profil Sayfası Verilerini Çekme ve Şifre Göster/Gizle Fonksiyonu
+function loadProfileData() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    db.ref(`users/${user.uid}/profile`).once('value', snapshot => {
+        const profile = snapshot.val() || {};
+        document.getElementById('profileName').value = profile.isim || '';
+        document.getElementById('profileEmail').value = profile.eposta || user.email || '';
+        document.getElementById('profilePhone').value = profile.telefon || '';
+        document.getElementById('profileGrade').value = profile.sinif || '';
+        document.getElementById('profilePassword').value = profile.sifre || '********';
+    });
+}
+
+function toggleProfilePassword() {
+    const passwordInput = document.getElementById('profilePassword');
+    const icon = document.getElementById('togglePasswordIcon');
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
 }

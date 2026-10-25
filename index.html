@@ -21,6 +21,7 @@
                 <a href="#" onclick="switchTab('graphicsView')" class="active" title="Çalışma Grafiği"><i class="fa-solid fa-chart-line"></i></a>
                 <a href="#" onclick="switchTab('calendarView')" title="Çalışma Takvimi"><i class="fa-solid fa-calendar-days"></i></a>
                 <a href="#" onclick="switchTab('reportsView')" title="Tüm Çalışma Kayıtları"><i class="fa-solid fa-table-list"></i></a>
+                <a href="#" onclick="switchTab('profileView')" title="Profil"><i class="fa-solid fa-user"></i></a>
                 <a href="#" onclick="switchTab('createView')" title="Bilgi Girişi"><i class="fa-solid fa-pen-to-square"></i></a>
                 <a href="#" onclick="logoutUser()" title="Çıkış Yap"><i class="fa-solid fa-right-from-bracket"></i></a>
             </nav>
@@ -71,10 +72,10 @@
                                 <label>Kaçıncı Sınıf?</label>
                                 <select id="regGrade" required>
                                     <option value="">Sınıf Seçiniz</option>
-                                    <option value="9">9. Sınıf</option>
-                                    <option value="10">10. Sınıf</option>
-                                    <option value="11">11. Sınıf</option>
-                                    <option value="12">12. Sınıf</option>
+                                    <option value="9. Sınıf">9. Sınıf</option>
+                                    <option value="10. Sınıf">10. Sınıf</option>
+                                    <option value="11. Sınıf">11. Sınıf</option>
+                                    <option value="12. Sınıf">12. Sınıf</option>
                                     <option value="Mezun">Mezun</option>
                                 </select>
                             </div>
@@ -106,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- BİLGİ GİRİŞİ (Sınırlar Eklenmiş Hali) -->
+                <!-- BİLGİ GİRİŞİ -->
                 <div id="createView" class="view-section" style="display: none;">
                     <div class="content-header">
                         <span class="badge">GÜNLÜK KAYIT</span>
@@ -245,6 +246,40 @@
                                 <tbody id="reportsTableBody">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROFIL BÖLÜMÜ -->
+                <div id="profileView" class="view-section" style="display: none;">
+                    <div class="reports-card" style="max-width: 600px; margin: 0 auto;">
+                        <div class="content-header">
+                            <h2>Kullanıcı Profili</h2>
+                            <p>Hesap bilgilerini ve kayıtlı şifreni buradan görüntüleyebilirsin.</p>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Ad Soyad</label>
+                            <input type="text" id="profileName" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>E-posta</label>
+                            <input type="email" id="profileEmail" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Telefon Numarası</label>
+                            <input type="tel" id="profilePhone" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Kaçıncı Sınıf?</label>
+                            <input type="text" id="profileGrade" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Şifre</label>
+                            <div style="position: relative;">
+                                <input type="password" id="profilePassword" readonly style="padding-right: 45px;">
+                                <i class="fa-solid fa-eye" id="togglePasswordIcon" onclick="toggleProfilePassword()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #64748b; font-size: 16px;"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
