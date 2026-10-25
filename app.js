@@ -481,12 +481,17 @@ function loadProfileData() {
     });
 }
 
-// Sürüm Detay Penceresini Açma / Kapama Fonksiyonu
+// Sürüm Detay Penceresini Açma / Kapama Fonksiyonu (Daha Sağlam Kontrol)
 function toggleVersionDetails() {
     const detailsBox = document.getElementById('versionDetailsBox');
     const chevronIcon = document.getElementById('versionChevronIcon');
 
-    if (detailsBox.style.display === 'none') {
+    if (!detailsBox) return;
+
+    // Elementin o anki görünürlük durumunu güvenli şekilde al
+    const computedDisplay = window.getComputedStyle(detailsBox).display;
+
+    if (computedDisplay === 'none') {
         detailsBox.style.display = 'block';
         chevronIcon.classList.remove('fa-chevron-down');
         chevronIcon.classList.add('fa-chevron-up');
