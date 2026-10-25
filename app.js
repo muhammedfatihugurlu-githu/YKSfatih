@@ -162,7 +162,6 @@ function loadChartData() {
 
     db.ref('users').once('value', snapshot => {
         const allUsersData = snapshot.val() || {};
-        const totalUsers = Object.keys(allUsersData).length;
         let labels = [];
         let userValues = [];
         let avgValues = [];
@@ -173,13 +172,17 @@ function loadChartData() {
             labels.forEach((_, monthIndex) => {
                 let mStr = String(monthIndex + 1).padStart(2, '0');
                 let uVal = 0;
-                let totalSum = 0;
+                let activeSum = 0;
+                let activeCount = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
                     let userMonthTotal = 0;
+                    let hasEntryThisMonth = false;
+
                     Object.keys(entries).forEach(dateKey => {
                         if (dateKey.startsWith(`2026-${mStr}`)) {
+                            hasEntryThisMonth = true;
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
@@ -188,14 +191,18 @@ function loadChartData() {
                         }
                     });
 
-                    totalSum += userMonthTotal;
-                    if (uid === user.uid) {
-                        uVal = userMonthTotal;
+                    // Sadece o ay içinde kaydı olanlar ortalamaya dahil edilir
+                    if (hasEntryThisMonth) {
+                        activeSum += userMonthTotal;
+                        activeCount++;
+                        if (uid === user.uid) {
+                            uVal = userMonthTotal;
+                        }
                     }
                 });
 
                 userValues.push(uVal);
-                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
+                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
             });
 
         } else if (range === 'yearly') {
@@ -203,13 +210,17 @@ function loadChartData() {
             
             labels.forEach(year => {
                 let uVal = 0;
-                let totalSum = 0;
+                let activeSum = 0;
+                let activeCount = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
                     let userYearTotal = 0;
+                    let hasEntryThisYear = false;
+
                     Object.keys(entries).forEach(dateKey => {
                         if (dateKey.startsWith(year)) {
+                            hasEntryThisYear = true;
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
@@ -218,14 +229,18 @@ function loadChartData() {
                         }
                     });
 
-                    totalSum += userYearTotal;
-                    if (uid === user.uid) {
-                        uVal = userYearTotal;
+                    // Sadece o yıl içinde kaydı olanlar ortalamaya dahil edilir
+                    if (hasEntryThisYear) {
+                        activeSum += userYearTotal;
+                        activeCount++;
+                        if (uid === user.uid) {
+                            uVal = userYearTotal;
+                        }
                     }
                 });
 
                 userValues.push(uVal);
-                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
+                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
             });
 
         } else {
@@ -238,24 +253,29 @@ function loadChartData() {
                 labels.push(dateStr);
 
                 let uVal = 0;
-                let totalSum = 0;
+                let activeSum = 0;
+                let activeCount = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
-                    const dayEntry = entries[dateStr] || {};
-                    let val = 0;
-                    if (currentMetric === 'soru') val = dayEntry.soru || 0;
-                    else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
-                    else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
+                    // Sadece o güne ait kaydı olan kullanıcılar ortalamaya dahil edilir
+                    if (entries[dateStr]) {
+                        const dayEntry = entries[dateStr];
+                        let val = 0;
+                        if (currentMetric === 'soru') val = dayEntry.soru || 0;
+                        else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
+                        else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
 
-                    totalSum += val;
-                    if (uid === user.uid) {
-                        uVal = val;
+                        activeSum += val;
+                        activeCount++;
+                        if (uid === user.uid) {
+                            uVal = val;
+                        }
                     }
                 });
 
                 userValues.push(uVal);
-                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
+                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
             }
         }
 
