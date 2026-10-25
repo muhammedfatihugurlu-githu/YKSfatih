@@ -283,7 +283,7 @@
                     <div class="reports-card" style="max-width: 650px; margin: 0 auto;">
                         <div class="content-header">
                             <h2>Hakkımda</h2>
-                            <p>Uygulama, geliştirici ve sürüm detayları.</p>
+                            <p>Uygulama ve geliştirici hakkında detaylı bilgiler.</p>
                         </div>
 
                         <div style="margin-top: 20px; line-height: 1.7; color: #334155;">
@@ -300,9 +300,14 @@
 
                             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
 
-                            <!-- Sürüm Bilgileri -->
-                            <h3 style="font-size: 16px; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-code-branch" style="color: #3b82f6; margin-right: 8px;"></i>Sürüm Bilgileri</h3>
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 10px;">
+                            <!-- Sürüm Bilgileri Tuşu -->
+                            <button type="button" class="btn-secondary" onclick="toggleVersionDetails()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; width: 100%; text-align: left;">
+                                <span><i class="fa-solid fa-code-branch" style="color: #3b82f6; margin-right: 10px;"></i><strong>Sürüm Bilgileri (v1.0.0)</strong></span>
+                                <i class="fa-solid fa-chevron-down" id="versionChevronIcon"></i>
+                            </button>
+
+                            <!-- Açılır Sürüm Detay Penceresi -->
+                            <div id="versionDetailsBox" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 12px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                     <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.0.0 (İlk Sürüm)</span>
                                     <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">Ekim 2026</span>

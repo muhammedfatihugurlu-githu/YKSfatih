@@ -468,7 +468,6 @@ function loadUserProfile(user) {
     });
 }
 
-// Profil Sayfası Verilerini Çekme (Şifresiz)
 function loadProfileData() {
     const user = auth.currentUser;
     if (!user) return;
@@ -480,4 +479,20 @@ function loadProfileData() {
         document.getElementById('profilePhone').value = profile.telefon || '';
         document.getElementById('profileGrade').value = profile.sinif || '';
     });
+}
+
+// Sürüm Detay Penceresini Açma / Kapama Fonksiyonu
+function toggleVersionDetails() {
+    const detailsBox = document.getElementById('versionDetailsBox');
+    const chevronIcon = document.getElementById('versionChevronIcon');
+
+    if (detailsBox.style.display === 'none') {
+        detailsBox.style.display = 'block';
+        chevronIcon.classList.remove('fa-chevron-down');
+        chevronIcon.classList.add('fa-chevron-up');
+    } else {
+        detailsBox.style.display = 'none';
+        chevronIcon.classList.remove('fa-chevron-up');
+        chevronIcon.classList.add('fa-chevron-down');
+    }
 }
