@@ -162,6 +162,7 @@ function loadChartData() {
 
     db.ref('users').once('value', snapshot => {
         const allUsersData = snapshot.val() || {};
+        const totalUsers = Object.keys(allUsersData).length;
         let labels = [];
         let userValues = [];
         let avgValues = [];
@@ -171,9 +172,8 @@ function loadChartData() {
             
             labels.forEach((_, monthIndex) => {
                 let mStr = String(monthIndex + 1).padStart(2, '0');
-                let uSum = 0;
-                let otherSum = 0;
-                let otherCount = 0;
+                let uVal = 0;
+                let totalSum = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
@@ -188,24 +188,22 @@ function loadChartData() {
                         }
                     });
 
-                    if (uid === user.uid) uSum = userMonthTotal;
-                    else {
-                        otherSum += userMonthTotal;
-                        otherCount++;
+                    totalSum += userMonthTotal;
+                    if (uid === user.uid) {
+                        uVal = userMonthTotal;
                     }
                 });
 
-                userValues.push(uSum);
-                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uSum);
+                userValues.push(uVal);
+                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
             });
 
         } else if (range === 'yearly') {
-            labels = ["2024", "2025", "2026", "2027"];
+            labels = ["2026", "2027", "2028", "2029"];
             
             labels.forEach(year => {
-                let uSum = 0;
-                let otherSum = 0;
-                let otherCount = 0;
+                let uVal = 0;
+                let totalSum = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
@@ -220,15 +218,14 @@ function loadChartData() {
                         }
                     });
 
-                    if (uid === user.uid) uSum = userYearTotal;
-                    else {
-                        otherSum += userYearTotal;
-                        otherCount++;
+                    totalSum += userYearTotal;
+                    if (uid === user.uid) {
+                        uVal = userYearTotal;
                     }
                 });
 
-                userValues.push(uSum);
-                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uSum);
+                userValues.push(uVal);
+                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
             });
 
         } else {
@@ -241,8 +238,7 @@ function loadChartData() {
                 labels.push(dateStr);
 
                 let uVal = 0;
-                let otherSum = 0;
-                let otherCount = 0;
+                let totalSum = 0;
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
@@ -252,15 +248,14 @@ function loadChartData() {
                     else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
                     else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
 
-                    if (uid === user.uid) uVal = val;
-                    else {
-                        otherSum += val;
-                        otherCount++;
+                    totalSum += val;
+                    if (uid === user.uid) {
+                        uVal = val;
                     }
                 });
 
                 userValues.push(uVal);
-                avgValues.push(otherCount > 0 ? Math.round(otherSum / otherCount) : uVal);
+                avgValues.push(totalUsers > 0 ? Math.round(totalSum / totalUsers) : uVal);
             }
         }
 
@@ -285,7 +280,7 @@ function loadChartData() {
                         tension: 0.3
                     },
                     {
-                        label: 'Ortalama (Diğer Öğrenciler)',
+                        label: 'Genel Ortalama',
                         data: avgValues,
                         borderColor: '#f59e0b',
                         borderDash: [5, 5],
@@ -481,14 +476,12 @@ function loadProfileData() {
     });
 }
 
-// Sürüm Detay Penceresini Açma / Kapama Fonksiyonu (Daha Sağlam Kontrol)
 function toggleVersionDetails() {
     const detailsBox = document.getElementById('versionDetailsBox');
     const chevronIcon = document.getElementById('versionChevronIcon');
 
     if (!detailsBox) return;
 
-    // Elementin o anki görünürlük durumunu güvenli şekilde al
     const computedDisplay = window.getComputedStyle(detailsBox).display;
 
     if (computedDisplay === 'none') {
