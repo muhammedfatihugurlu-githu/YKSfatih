@@ -56,7 +56,6 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// Kayıt Olma (Şifre veritabanına da kaydedilir ki profilde görüntülenebilsin)
 document.getElementById('registerForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('regName').value;
@@ -72,8 +71,7 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
                 isim: name, 
                 eposta: email, 
                 telefon: phone, 
-                sinif: grade,
-                sifre: password
+                sinif: grade 
             });
         })
         .then(() => {
@@ -470,7 +468,7 @@ function loadUserProfile(user) {
     });
 }
 
-// Profil Sayfası Verilerini Çekme ve Şifre Göster/Gizle Fonksiyonu
+// Profil Sayfası Verilerini Çekme (Şifresiz)
 function loadProfileData() {
     const user = auth.currentUser;
     if (!user) return;
@@ -481,20 +479,5 @@ function loadProfileData() {
         document.getElementById('profileEmail').value = profile.eposta || user.email || '';
         document.getElementById('profilePhone').value = profile.telefon || '';
         document.getElementById('profileGrade').value = profile.sinif || '';
-        document.getElementById('profilePassword').value = profile.sifre || '********';
     });
-}
-
-function toggleProfilePassword() {
-    const passwordInput = document.getElementById('profilePassword');
-    const icon = document.getElementById('togglePasswordIcon');
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
 }
