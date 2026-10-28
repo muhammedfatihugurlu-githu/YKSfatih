@@ -33,7 +33,7 @@ function switchTab(viewId) {
     }
 }
 
-// Son 30 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı
+// Son 30 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı[cite: 6]
 function setAllowedDates() {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
@@ -62,7 +62,7 @@ function openLogin() {
     document.getElementById('loginFormSection').style.display = 'block';
 }
 
-// Oturum Kontrolü ve Profil Bilgisi Yükleme
+// Oturum Kontrolü ve Profil Bilgisi Yükleme[cite: 6]
 auth.onAuthStateChanged(user => {
     if (user) {
         document.getElementById('authSection').style.display = 'none';
@@ -117,7 +117,7 @@ function logoutUser() {
     auth.signOut();
 }
 
-// Bilgi Girişi ve Sınır Kontrolleri (Son 30 gün ve gelecek tarih engeli)
+// Bilgi Girişi ve Sınır Kontrolleri (Sadece son 2 kayıt güncellenebilir, eskiler değiştirilemez)[cite: 6]
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -135,43 +135,58 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
     selectedObj.setHours(0,0,0,0);
 
     if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
-        alert("Sadece son 30 gün içine kayıt girebilir veya düzenleyebilirsiniz. Gelecek tarihlere kayıt yapılamaz! 🛑");
+        alert("Sadece son 30 gün içinde kayıt girebilirsiniz. Gelecek tarihlere kayıt yapılamaz! 🛑");
         return;
     }
 
-    const questions = Number(document.getElementById('studyQuestions').value) || 0;
-    const pages = Number(document.getElementById('studyPages').value) || 0;
-    const hours = Number(document.getElementById('studyHours').value) || 0;
-    const minutes = Number(document.getElementById('studyMinutes').value) || 0;
-    const totalHours = hours + (minutes / 60);
+    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
+        const entries = snapshot.val() || {};
+        const sortedDates = Object.keys(entries).sort().reverse();
 
-    if (questions > 720) {
-        alert("Günlük en fazla 720 soru girebilirsin! 🛑");
-        return;
-    }
-    if (pages > 600) {
-        alert("Günlük en fazla 600 sayfa kitap okuyabilirsin! 🛑");
-        return;
-    }
-    if (totalHours > 16) {
-        alert("Günlük çalışma süresi en fazla 16 saat olabilir! 🛑");
-        return;
-    }
+        // Eğer bu tarihe daha önce kayıt girilmişse, sadece en son girilen ilk 2 kayıt (index 0 ve 1) değiştirebilir[cite: 6]
+        if (entries[date]) {
+            const isOneOfLastTwo = (sortedDates[0] === date || sortedDates[1] === date);
+            if (!isOneOfLastTwo) {
+                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece en son girilen son 2 kaydınızı değiştirebilirsiniz! 🛑");
+                return;
+            }
+        }
 
-    const entryData = {
-        soru: questions,
-        sayfa: pages,
-        sure: totalHours,
-        timestamp: Date.now()
-    };
+        const questions = Number(document.getElementById('studyQuestions').value) || 0;
+        const pages = Number(document.getElementById('studyPages').value) || 0;
+        const hours = Number(document.getElementById('studyHours').value) || 0;
+        const minutes = Number(document.getElementById('studyMinutes').value) || 0;
+        const totalHours = hours + (minutes / 60);
 
-    db.ref(`users/${user.uid}/entries/${date}`).set(entryData)
-        .then(() => {
-            alert("Çalışma başarıyla kaydedildi! 🚀");
-            document.getElementById('studyForm').reset();
-            setAllowedDates();
-        })
-        .catch(err => alert("Kayıt hatası: " + err.message));
+        if (questions > 720) {
+            alert("Günlük en fazla 720 soru girebilirsin! 🛑");
+            return;
+        }
+        if (pages > 600) {
+            alert("Günlük en fazla 600 sayfa kitap okuyabilirsin! 🛑");
+            return;
+        }
+        if (totalHours > 16) {
+            alert("Günlük çalışma süresi en fazla 16 saat olabilir! 🛑");
+            return;
+        }
+
+        const entryData = {
+            soru: questions,
+            sayfa: pages,
+            sure: totalHours,
+            timestamp: Date.now()
+        };
+
+        db.ref(`users/${user.uid}/entries/${date}`).set(entryData)
+            .then(() => {
+                alert("Çalışma başarıyla kaydedildi! 🚀");
+                document.getElementById('studyForm').reset();
+                setAllowedDates();
+                loadChartData();
+            })
+            .catch(err => alert("Kayıt hatası: " + err.message));
+    });
 });
 
 function markAsNotStudied() {
@@ -194,8 +209,27 @@ function markAsNotStudied() {
     }
 
     const user = auth.currentUser;
-    db.ref(`users/${user.uid}/entries/${dateInput}`).set({ soru: 0, sayfa: 0, sure: 0, calismadi: true })
-        .then(() => alert("Bugün çalışılmadı olarak işaretlendi."));
+    if (!user) return;
+
+    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
+        const entries = snapshot.val() || {};
+        const sortedDates = Object.keys(entries).sort().reverse();
+
+        if (entries[dateInput]) {
+            const isOneOfLastTwo = (sortedDates[0] === dateInput || sortedDates[1] === dateInput);
+            if (!isOneOfLastTwo) {
+                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece son 2 kaydınızı değiştirebilirsiniz! 🛑");
+                return;
+            }
+        }
+
+        db.ref(`users/${user.uid}/entries/${dateInput}`).set({ soru: 0, sayfa: 0, sure: 0, calismadi: true })
+            .then(() => {
+                alert("Bugün çalışılmadı olarak işaretlendi.");
+                setAllowedDates();
+                loadChartData();
+            });
+    });
 }
 
 function setChartMetric(metric, btn) {
@@ -414,7 +448,7 @@ function loadCalendarGrid() {
     });
 }
 
-// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayıt için düzenle butonu)
+// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayıt için küçük düzenle butonu)[cite: 6]
 function loadReportsTable() {
     const user = auth.currentUser;
     if (!user) return;
@@ -424,7 +458,6 @@ function loadReportsTable() {
         const tbody = document.getElementById('reportsTableBody');
         tbody.innerHTML = '';
 
-        // Kayıtları tarihe göre tersten sıralıyoruz (En yeni en üstte)
         const sortedDates = Object.keys(data).sort().reverse();
 
         if (sortedDates.length === 0) {
@@ -444,7 +477,7 @@ function loadReportsTable() {
             const tr = document.createElement('tr');
             
             let actionHtml = '';
-            // Tablodaki ilk 2 satır, sisteme en son girilen en yeni 2 kayıttır.
+            // Tablodaki ilk 2 satır (en son girilen en yeni 2 kayıt) için düzenle butonu gösterilir[cite: 6]
             if (index < 2) {
                 actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 2px 6px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>`;
             }
