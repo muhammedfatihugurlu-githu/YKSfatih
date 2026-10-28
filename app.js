@@ -23,7 +23,6 @@ function switchTab(viewId) {
 
     document.querySelectorAll('.sidebar nav a').forEach(el => el.classList.remove('active'));
     
-    // Güvenli aktif sekme işaretleme
     const links = document.querySelectorAll('.sidebar nav a');
     links.forEach(link => {
         if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(viewId)) {
@@ -39,6 +38,28 @@ function switchTab(viewId) {
         setAllowedDates();
     }
 }
+
+// 3 Çizgili Menüyü Açma / Kapatma Fonksiyonu
+function toggleMoreMenu() {
+    const menu = document.getElementById('moreDropdownMenu');
+    if (!menu) return;
+    if (menu.style.display === 'none' || menu.style.display === '') {
+        menu.style.display = 'block';
+    } else {
+        menu.style.display = 'none';
+    }
+}
+
+// Menü dışında bir yere tıklandığında menüyü kapatma
+window.addEventListener('click', function(e) {
+    const menu = document.getElementById('moreDropdownMenu');
+    const menuBtn = document.querySelector('[onclick="toggleMoreMenu()"]');
+    if (menu && menu.style.display === 'block') {
+        if (menuBtn && !menu.contains(e.target) && !menuBtn.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    }
+});
 
 // Son 30 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı[cite: 6]
 function setAllowedDates() {
@@ -425,7 +446,6 @@ function changeCalendarMonth(offset) {
     loadCalendarGrid();
 }
 
-// Takvim Günlerine Tıklama ve Sınırlandırma Özelliği Eklendi
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -451,13 +471,12 @@ function loadCalendarGrid() {
             const div = document.createElement('div');
             div.className = 'cal-day';
             div.innerText = day;
-            div.style.cursor = 'pointer'; // Tıklanabilir olduğunu gösterir
+            div.style.cursor = 'pointer';
 
             if (data[dateStr]) {
                 div.classList.add('worked');
             }
 
-            // Takvim gününe tıklandığında çalışacak kontrol ve yönlendirme mantığı
             div.onclick = () => {
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
@@ -468,22 +487,18 @@ function loadCalendarGrid() {
                 const selectedObj = new Date(dateStr);
                 selectedObj.setHours(0, 0, 0, 0);
 
-                // Son 30 gün içinde değilse veya gelecek tarihse engelle
                 if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
                     alert("Bu tarihe gidemezsiniz! Sadece son 30 gün içindeki tarihlere kayıt girebilir veya inceleyebilirsiniz. Gelecek tarihler seçilemez. 🛑");
                     return;
                 }
 
-                // Günlük kayıt (Bilgi Girişi) sekmesine git
                 switchTab('createView');
 
-                // Tarih inputunu seçilen güne ayarla
                 const dateInput = document.getElementById('studyDate');
                 if (dateInput) {
                     dateInput.value = dateStr;
                 }
 
-                // Eğer o güne ait daha önceden kayıt varsa formu doldur, yoksa sıfırla
                 db.ref(`users/${user.uid}/entries/${dateStr}`).once('value', snap => {
                     const entry = snap.val();
                     if (entry) {
@@ -508,7 +523,6 @@ function loadCalendarGrid() {
     });
 }
 
-// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayıt için küçük düzenle butonu)[cite: 6]
 function loadReportsTable() {
     const user = auth.currentUser;
     if (!user) return;
@@ -669,6 +683,24 @@ function loadProfileData() {
         document.getElementById('profilePhone').value = profile.telefon || '';
         document.getElementById('profileGrade').value = profile.sinif || '';
     });
+}
+
+// Profil Sınıfını Güncelleme Fonksiyonu
+function updateProfileGrade() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const newGrade = document.getElementById('profileGrade').value;
+    if (!newGrade) {
+        alert("Lütfen bir sınıf seçiniz!");
+        return;
+    }
+
+    db.ref(`users/${user.uid}/profile/sinif`).set(newGrade)
+        .then(() => {
+            alert("Sınıf bilginiz başarıyla güncellendi! 🚀");
+        })
+        .catch(err => alert("Güncelleme hatası: " + err.message));
 }
 
 function toggleVersionDetails() {

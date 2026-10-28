@@ -21,9 +21,17 @@
                 <a href="#" onclick="switchTab('graphicsView')" class="active" title="Çalışma Grafiği"><i class="fa-solid fa-chart-line"></i></a>
                 <a href="#" onclick="switchTab('calendarView')" title="Çalışma Takvimi"><i class="fa-solid fa-calendar-days"></i></a>
                 <a href="#" onclick="switchTab('reportsView')" title="Tüm Çalışma Kayıtları"><i class="fa-solid fa-table-list"></i></a>
-                <a href="#" onclick="switchTab('profileView')" title="Profil"><i class="fa-solid fa-user"></i></a>
-                <a href="#" onclick="switchTab('aboutView')" title="Hakkımda"><i class="fa-solid fa-circle-info"></i></a>
                 <a href="#" onclick="switchTab('createView')" title="Bilgi Girişi"><i class="fa-solid fa-pen-to-square"></i></a>
+                
+                <!-- 3 Çizgili Menü (Profil ve Hakkımda) -->
+                <div style="position: relative; display: flex; justify-content: center; width: 100%;">
+                    <a href="javascript:void(0)" onclick="toggleMoreMenu()" title="Menü"><i class="fa-solid fa-bars"></i></a>
+                    <div id="moreDropdownMenu" style="display: none; position: absolute; left: 70px; bottom: 0; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 8px; width: 140px; z-index: 2000; border: 1px solid #e2e8f0;">
+                        <a href="#" onclick="switchTab('profileView'); toggleMoreMenu();" style="display: flex; align-items: center; gap: 8px; padding: 10px; color: #334155; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; width: 100%;"><i class="fa-solid fa-user" style="color: #4f46e5;"></i> Profil</a>
+                        <a href="#" onclick="switchTab('aboutView'); toggleMoreMenu();" style="display: flex; align-items: center; gap: 8px; padding: 10px; color: #334155; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; width: 100%;"><i class="fa-solid fa-circle-info" style="color: #22c55e;"></i> Hakkımda</a>
+                    </div>
+                </div>
+
                 <a href="#" onclick="logoutUser()" title="Çıkış Yap"><i class="fa-solid fa-right-from-bracket"></i></a>
             </nav>
         </aside>
@@ -252,12 +260,12 @@
                     </div>
                 </div>
 
-                <!-- PROFIL BÖLÜMÜ -->
+                <!-- PROFIL BÖLÜMÜ (Sınıf Güncellenebilir Hale Getirildi) -->
                 <div id="profileView" class="view-section" style="display: none;">
                     <div class="reports-card" style="max-width: 600px; margin: 0 auto;">
                         <div class="content-header">
                             <h2>Kullanıcı Profili</h2>
-                            <p>Hesap bilgilerini buradan görüntüleyebilirsin.</p>
+                            <p>Hesap bilgilerini buradan görüntüleyebilir ve sınıfını güncelleyebilirsin.</p>
                         </div>
 
                         <div class="form-group" style="margin-top: 20px;">
@@ -274,8 +282,16 @@
                         </div>
                         <div class="form-group">
                             <label>Kaçıncı Sınıf?</label>
-                            <input type="text" id="profileGrade" readonly>
+                            <select id="profileGrade" style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; background-color: #f8fafc; outline: none;">
+                                <option value="">Sınıf Seçiniz</option>
+                                <option value="9. Sınıf">9. Sınıf</option>
+                                <option value="10. Sınıf">10. Sınıf</option>
+                                <option value="11. Sınıf">11. Sınıf</option>
+                                <option value="12. Sınıf">12. Sınıf</option>
+                                <option value="Mezun">Mezun</option>
+                            </select>
                         </div>
+                        <button type="button" class="btn-submit" onclick="updateProfileGrade()">Sınıfı Güncelle</button>
                     </div>
                 </div>
 
@@ -318,7 +334,7 @@
                                     <li>Çalışma Takviminde; güncel seri, en iyi seri ve toplam giriş günü değerleri ile seri bilgileri. Takvimde kayıt alınan gün için yeşil renk ile analiz.</li>
                                     <li>Tüm çalışma kayıtları; kayıt edilen her gün için rapor oluşturma ve geçmiş analiz.</li>
                                     <li>Günlük kayıt; gün gün çalışmaları kayıt edebildiğimiz veya bugün çalışmadım diyebildildiğimiz bir ders kayıt sayfası.</li>
-                                    <li>Hem mobil hemde Bilgisayar destekli arayüz.</li>
+                                    <li>Hem mobil hem de Bilgisayar destekli arayüz.</li>
                                     <li>Her sayfanın başında olan Hoşgeldin "*kullanıcı*" yazısı.</li>
                                     <li>Hesap çıkış butonu ile hesaptan ayrılma.</li>
                                 </ul>
@@ -327,7 +343,7 @@
                                     <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">25 Ekim 2026</span>
                                 </div>
                                 <ul style="margin-left: 18px; font-size: 13px; color: #475569;">
-                                <li>Kullanıcı profili; Hesap bilgilerini görme yeri.</li> 
+                                <li>Kullanıcı profili ve sınıf güncelleme alanı.</li> 
                                 <li>Hakkımda; proje hakkında ve geliştirici hakkında bilgiler ve sürüm bilgileri bölümü.</li>  
                             </div>
 
