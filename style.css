@@ -88,7 +88,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     padding: 8px;
-    width: 140px;
+    width: 130px;
     z-index: 2000;
     border: 1px solid #e2e8f0;
 }
@@ -96,8 +96,7 @@ body {
 .more-dropdown a {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px;
+    padding: 10px 12px;
     color: #334155;
     text-decoration: none;
     border-radius: 8px;
@@ -511,9 +510,7 @@ body {
     font-weight: 500;
 }
 
-/* ==========================================
-   MASAÜSTÜ SPESİFİK YÖNLENDİRMELER (Desktop)
-   ========================================== */
+/* Masaüstü Menü Açılır Konum */
 @media (min-width: 769px) {
     .more-dropdown {
         left: 70px;
@@ -521,9 +518,7 @@ body {
     }
 }
 
-/* ==========================================
-   MOBİL İÇİN RESPONSIVE (DUYARLI) DÜZEN
-   ========================================== */
+/* Mobil Uyumlu Düzen */
 @media (max-width: 768px) {
     body {
         overflow-y: auto;
