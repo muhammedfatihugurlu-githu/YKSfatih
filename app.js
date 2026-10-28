@@ -107,12 +107,12 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
     const minutes = Number(document.getElementById('studyMinutes').value) || 0;
     const totalHours = hours + (minutes / 60);
 
-    if (questions > 1000) {
-        alert("Günlük en fazla 1000 soru girebilirsin! 🛑");
+    if (questions > 720) {
+        alert("Günlük en fazla 720 soru girebilirsin! 🛑");
         return;
     }
-    if (pages > 500) {
-        alert("Günlük en fazla 500 sayfa kitap okuyabilirsin! 🛑");
+    if (pages > 600) {
+        alert("Günlük en fazla 600 sayfa kitap okuyabilirsin! 🛑");
         return;
     }
     if (totalHours > 16) {
@@ -202,7 +202,6 @@ function loadChartData() {
 
                 userValues.push(uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
-                // Çalışma süresi (saat) ise ondalıklı bırak, soru/kitap ise tam sayıya yuvarla
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             });
 
@@ -264,7 +263,7 @@ function loadChartData() {
                         let val = 0;
                         if (currentMetric === 'soru') val = dayEntry.soru || 0;
                         else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
-                        else if (currentMetric === 'calisma') val = dayEntry.sure || 0;
+                        else if (currentMetric === 'calisma') val = Number(dayEntry.sure) || 0; // Sayısal dönüşüm güvencesi
 
                         activeSum += val;
                         activeCount++;
@@ -276,6 +275,7 @@ function loadChartData() {
 
                 userValues.push(uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
+                // Çalışma süresi için ondalıklı net ortalama (toFixed(2)), diğerleri için tam sayı
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             }
         }
@@ -363,6 +363,7 @@ function loadCalendarGrid() {
     });
 }
 
+// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayda düzenle butonu eklendi)
 function loadReportsTable() {
     const user = auth.currentUser;
     if (!user) return;
@@ -375,11 +376,11 @@ function loadReportsTable() {
         const sortedDates = Object.keys(data).sort().reverse();
 
         if (sortedDates.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b;">Henüz bir çalışma kaydı bulunmuyor.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">Henüz bir çalışma kaydı bulunmuyor.</td></tr>`;
             return;
         }
 
-        sortedDates.forEach(dateStr => {
+        sortedDates.forEach((dateStr, index) => {
             const entry = data[dateStr];
             const totalHours = entry.sure || 0;
             const hours = Math.floor(totalHours);
@@ -389,14 +390,44 @@ function loadReportsTable() {
             const formattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`;
 
             const tr = document.createElement('tr');
+            
+            // Sadece en son girilen ilk 2 kayıt (index 0 ve 1) için düzenle butonu gösterilir
+            let actionHtml = '';
+            if (index < 2) {
+                actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-pen"></i> Düzenle</button>`;
+            }
+
             tr.innerHTML = `
                 <td>${formattedDate}</td>
                 <td>${entry.soru || 0}</td>
                 <td>${hours} saat ${minutes} dk</td>
                 <td>${entry.sayfa || 0}</td>
+                <td>${actionHtml}</td>
             `;
             tbody.appendChild(tr);
         });
+    });
+}
+
+// Kayıt Düzenleme Fonksiyonu (Seçilen son kaydı bilgi girişine taşıyarak güncellemeyi sağlar)
+function editEntry(dateStr) {
+    switchTab('createView');
+    document.getElementById('studyDate').value = dateStr;
+    
+    const user = auth.currentUser;
+    if (!user) return;
+
+    db.ref(`users/${user.uid}/entries/${dateStr}`).once('value', snapshot => {
+        const entry = snapshot.val();
+        if (entry) {
+            document.getElementById('studyQuestions').value = entry.soru || 0;
+            document.getElementById('studyPages').value = entry.sayfa || 0;
+            const totalHours = entry.sure || 0;
+            const hours = Math.floor(totalHours);
+            const minutes = Math.round((totalHours - hours) * 60);
+            document.getElementById('studyHours').value = hours;
+            document.getElementById('studyMinutes').value = minutes;
+        }
     });
 }
 
