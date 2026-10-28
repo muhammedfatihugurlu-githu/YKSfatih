@@ -295,8 +295,7 @@
                     </div>
                 </div>
 
-
-                   <!-- HAKKIMDA VE GELİŞTİRİCİ BÖLÜMÜ -->
+                <!-- HAKKIMDA VE GELİŞTİRİCİ BÖLÜMÜ -->
                 <div id="aboutView" class="view-section" style="display: none;">
                     <div class="reports-card" style="max-width: 650px; margin: 0 auto;">
                         <div class="content-header">
@@ -314,55 +313,67 @@
                             <!-- Geliştirici Hakkında -->
                             <h3 style="font-size: 16px; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-user-gear" style="color: #22c55e; margin-right: 8px;"></i>Geliştirici Hakkında</h3>
                             <p style="margin-bottom: 8px;">Bu platform, <strong>Muhammed Fatih Uğurlu</strong> tarafından tasarlanmış ve kodlanmıştır.</p>
-                            <p style="margin-bottom: 16px;"><strong>Muhammed Fatih Uğurlu</strong>, Fuat Sezgin İmam Hatip Lisesi'nde 10.sınıf öğrencisi olmakta ve bu platformu geliştimeye devam etmektedir.</p>
+                            <p style="margin-bottom: 16px;"><strong>Muhammed Fatih Uğurlu</strong>, Fuat Sezgin İmam Hatip Lisesi'nde 10.sınıf öğrencisi olmakta ve bu platformu geliştirmeye devam etmektedir.</p>
 
                             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
 
                             <!-- Sürüm Bilgileri Tuşu -->
-<button type="button" class="btn-secondary" onclick="toggleVersionDetails()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; width: 100%; text-align: left;">
-    <span><i class="fa-solid fa-code-branch" style="color: #3b82f6; margin-right: 10px;"></i><strong>Sürüm Bilgileri (v1.2.0)</strong></span>
-    <i class="fa-solid fa-chevron-down" id="versionChevronIcon"></i>
-</button>
+                            <button type="button" class="btn-secondary" onclick="toggleVersionDetails()" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; width: 100%; text-align: left;">
+                                <span><i class="fa-solid fa-code-branch" style="color: #3b82f6; margin-right: 10px;"></i><strong>Sürüm Bilgileri (v1.2.0)</strong></span>
+                                <i class="fa-solid fa-chevron-down" id="versionChevronIcon"></i>
+                            </button>
 
-<!-- Açılır Sürüm Detay Penceresi -->
-<div id="versionDetailsBox" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 12px;">
-    
-    <!-- v1.0.0 -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-        <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.0.0 (İlk Sürüm)</span>
-        <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">24 Ekim 2026</span>
+                            <!-- Açılır Sürüm Detay Penceresi -->
+                            <div id="versionDetailsBox" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 12px;">
+                                
+                                <!-- v1.0.0 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.0.0 (İlk Sürüm)</span>
+                                    <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">24 Ekim 2026</span>
+                                </div>
+                                <ul style="margin-left: 18px; font-size: 13px; color: #475569; margin-bottom: 15px;">
+                                    <li>Çalışma Grafiğinde; çözülen soru sayısı, okunan sayfa ve çalışılan süre değerlerine bakabilme. Hem 10 günlük, haftalık, aylık ve yıllık analizler ile hem de diğer öğrencilerin ortalama değerleri ile görsel analiz.</li>
+                                    <li>Çalışma Takviminde; güncel seri, en iyi seri ve toplam giriş günü değerleri ile seri bilgileri. Takvimde kayıt alınan gün için yeşil renk ile analiz.</li>
+                                    <li>Tüm Çalışma Kayıtları; kayıt edilen her gün için rapor oluşturma ve geçmiş analiz.</li>
+                                    <li>Günlük Kayıt; gün gün çalışmaları kayıt edebildiğimiz veya bugün çalışmadım diyebildiğimiz bir ders kayıt sayfası.</li>
+                                    <li>Hem mobil hem de Bilgisayar destekli arayüz.</li>
+                                    <li>Her sayfanın başında olan Hoşgeldin "*kullanıcı*" yazısı.</li>
+                                    <li>Hesap çıkış butonu ile hesaptan ayrılma.</li>
+                                </ul>
+
+                                <!-- v1.1.0 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 15px;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.1.0</span>
+                                    <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">25 Ekim 2026</span>
+                                </div>
+                                <ul style="margin-left: 18px; font-size: 13px; color: #475569; margin-bottom: 15px;">
+                                    <li>Kullanıcı profili ve sınıf güncelleme alanı.</li> 
+                                    <li>Hakkımda; proje hakkında ve geliştirici hakkında bilgiler ve sürüm bilgileri bölümü.</li>  
+                                </ul>
+
+                                <!-- v1.2.0 -->
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 15px;">
+                                    <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.2.0</span>
+                                    <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">28 Ekim 2026</span>
+                                </div>
+                                <ul style="margin-left: 18px; font-size: 13px; color: #475569;">
+                                    <li>En son girilen 2 kayıtları Tüm çalışma kayıtları sekmesinden değiştirme özelliği.</li> 
+                                    <li>Son 30 güne kayıt oluşturabilme özelliği.</li>  
+                                    <li>Çalışma takvimi sekmesinden takvimdeki hangi güne basılırsa otomatik günlük kayıtın o gün için açılması özelliği.</li> 
+                                    <li>Sekmeler Menüsüne 3 çizgili bir menü tuşu, bunun ile hakkımda ve profil sekmelerine geçiş özelliği.</li> 
+                                    <li>Sınıf değiştirebilme özelliği.</li> 
+                                </ul>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
     </div>
-    <ul style="margin-left: 18px; font-size: 13px; color: #475569; margin-bottom: 15px;">
-        <li>Çalışma Grafiğinde; çözülen soru sayısı, okunan sayfa ve çalışılan süre değerlerine bakabilme. Hem 10 günlük, haftalık, aylık ve yıllık analizler ile hem de diğer öğrencilerin ortalama değerleri ile görsel analiz.</li>
-        <li>Çalışma Takviminde; güncel seri, en iyi seri ve toplam giriş günü değerleri ile seri bilgileri. Takvimde kayıt alınan gün için yeşil renk ile analiz.</li>
-        <li>Tüm Çalışma Kayıtları; kayıt edilen her gün için rapor oluşturma ve geçmiş analiz.</li>
-        <li>Günlük Kayıt; gün gün çalışmaları kayıt edebildiğimiz veya bugün çalışmadım diyebildiğimiz bir ders kayıt sayfası.</li>
-        <li>Hem mobil hem de Bilgisayar destekli arayüz.</li>
-        <li>Her sayfanın başında olan Hoşgeldin "*kullanıcı*" yazısı.</li>
-        <li>Hesap çıkış butonu ile hesaptan ayrılma.</li>
-    </ul>
 
-    <!-- v1.1.0 -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 15px;">
-        <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.1.0</span>
-        <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">25 Ekim 2026</span>
-    </div>
-    <ul style="margin-left: 18px; font-size: 13px; color: #475569; margin-bottom: 15px;">
-        <li>Kullanıcı profili ve sınıf güncelleme alanı.</li> 
-        <li>Hakkımda; proje hakkında ve geliştirici hakkında bilgiler ve sürüm bilgileri bölümü.</li>  
-    </ul>
-
-    <!-- v1.2.0 -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; margin-top: 15px;">
-        <span style="font-weight: 700; color: #0f172a; font-size: 15px;">v1.2.0</span>
-        <span style="font-size: 12px; color: #64748b; background: #e2e8f0; padding: 2px 8px; border-radius: 6px;">28 Ekim 2026</span>
-    </div>
-    <ul style="margin-left: 18px; font-size: 13px; color: #475569;">
-        <li>En son girilen 2 kayıtları Tüm çalışma kayıtları sekmesinden değiştirme özelliği.</li> 
-        <li>Son 30 güne kayıt oluşturabilme özelliği.</li>  
-        <li>Çalışma takvimi sekmesinden takvimdeki hangi güne basılırsa otomatik günlük kayıtın o gün için açılması özelliği.</li> 
-        <li>Sekmeler Menüsüne 3 çizgili bir menü tuşu, bunun ile hakkımda ve profil sekmelerine geçiş özelliği.</li> 
-        <li>Sınıf değiştirebilme özelliği.</li> 
-    </ul>
-
-</div>
+    <script src="app.js"></script>
+</body>
+</html>
