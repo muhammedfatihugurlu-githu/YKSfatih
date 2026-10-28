@@ -272,7 +272,7 @@ function loadChartData() {
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
-                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
+                            else if (currentMetric === 'calisma') val = Number(entries[dateKey].sure) || 0;
                             userMonthTotal += val;
                         }
                     });
@@ -286,7 +286,7 @@ function loadChartData() {
                     }
                 });
 
-                userValues.push(uVal);
+                userValues.push(currentMetric === 'calisma' ? Number(uVal.toFixed(2)) : uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             });
@@ -310,7 +310,7 @@ function loadChartData() {
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
-                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
+                            else if (currentMetric === 'calisma') val = Number(entries[dateKey].sure) || 0;
                             userYearTotal += val;
                         }
                     });
@@ -324,7 +324,7 @@ function loadChartData() {
                     }
                 });
 
-                userValues.push(uVal);
+                userValues.push(currentMetric === 'calisma' ? Number(uVal.toFixed(2)) : uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             });
@@ -359,8 +359,9 @@ function loadChartData() {
                     }
                 });
 
-                userValues.push(uVal);
+                userValues.push(currentMetric === 'calisma' ? Number(uVal.toFixed(2)) : uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
+                // ÇALIŞMA metriğinde ortalamayı da ondalıklı (toFixed(2)) tutuyoruz ki yuvarlanmasın
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             }
         }
@@ -369,7 +370,7 @@ function loadChartData() {
         if (currentMetric === 'kitap') labelName = 'Okunan Sayfa (Kitap)';
         if (currentMetric === 'calisma') labelName = 'Çalışma Süresi (Saat)';
 
-        // Mobil cihazlar için nokta boyutunu büyütme ayarı (Bilgisayarda 3px, mobilde 6px)
+        // Mobil cihazlar için nokta boyutunu büyütme ayarı (Mobilde 6px, bilgisayarda 3px)
         const isMobile = window.innerWidth <= 768;
         const dynamicPointRadius = isMobile ? 6 : 3;
         const dynamicHoverRadius = isMobile ? 9 : 5;
