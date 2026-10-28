@@ -191,7 +191,6 @@ function loadChartData() {
                         }
                     });
 
-                    // Sadece o ay içinde kaydı olanlar ortalamaya dahil edilir
                     if (hasEntryThisMonth) {
                         activeSum += userMonthTotal;
                         activeCount++;
@@ -202,7 +201,9 @@ function loadChartData() {
                 });
 
                 userValues.push(uVal);
-                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
+                let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
+                // Çalışma süresi (saat) ise ondalıklı bırak, soru/kitap ise tam sayıya yuvarla
+                avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             });
 
         } else if (range === 'yearly') {
@@ -229,7 +230,6 @@ function loadChartData() {
                         }
                     });
 
-                    // Sadece o yıl içinde kaydı olanlar ortalamaya dahil edilir
                     if (hasEntryThisYear) {
                         activeSum += userYearTotal;
                         activeCount++;
@@ -240,7 +240,8 @@ function loadChartData() {
                 });
 
                 userValues.push(uVal);
-                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
+                let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
+                avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             });
 
         } else {
@@ -258,7 +259,6 @@ function loadChartData() {
 
                 Object.keys(allUsersData).forEach(uid => {
                     const entries = allUsersData[uid].entries || {};
-                    // Sadece o güne ait kaydı olan kullanıcılar ortalamaya dahil edilir
                     if (entries[dateStr]) {
                         const dayEntry = entries[dateStr];
                         let val = 0;
@@ -275,7 +275,8 @@ function loadChartData() {
                 });
 
                 userValues.push(uVal);
-                avgValues.push(activeCount > 0 ? Math.round(activeSum / activeCount) : 0);
+                let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
+                avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             }
         }
 
