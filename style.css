@@ -28,6 +28,7 @@ body {
     align-items: center;
     padding: 24px 0;
     flex-shrink: 0;
+    z-index: 100;
 }
 
 .sidebar .logo-box {
@@ -52,7 +53,8 @@ body {
     align-items: center;
 }
 
-.sidebar nav a {
+.sidebar nav a, 
+.menu-btn {
     width: 48px;
     height: 48px;
     border-radius: 12px;
@@ -63,10 +65,14 @@ body {
     text-decoration: none;
     font-size: 20px;
     transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
 
 .sidebar nav a:hover,
-.sidebar nav a.active {
+.sidebar nav a.active,
+.menu-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     color: #ffffff;
 }
@@ -84,31 +90,43 @@ body {
 .more-dropdown {
     display: none;
     position: absolute;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     padding: 8px;
-    width: 130px;
+    width: 150px;
     z-index: 2000;
     border: 1px solid #e2e8f0;
 }
 
 .more-dropdown a {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    color: #334155;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    width: 100%;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    width: 100% !important;
     height: auto !important;
+    background: transparent !important;
+}
+
+.more-dropdown a i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
 }
 
 .more-dropdown a:hover {
-    background: #f1f5f9;
-    color: #4f46e5;
+    background: #f1f5f9 !important;
+    color: #4f46e5 !important;
 }
 
 .main-content {
@@ -510,15 +528,7 @@ body {
     font-weight: 500;
 }
 
-/* Masaüstü Menü Açılır Konum */
-@media (min-width: 769px) {
-    .more-dropdown {
-        left: 70px;
-        bottom: 0;
-    }
-}
-
-/* Mobil Uyumlu Düzen */
+/* Mobil Duyarlı Ayarlar (Bottom Bar) */
 @media (max-width: 768px) {
     body {
         overflow-y: auto;
@@ -561,7 +571,8 @@ body {
         gap: 0;
     }
 
-    .sidebar nav a {
+    .sidebar nav a, 
+    .menu-btn {
         width: 44px;
         height: 44px;
         font-size: 18px;
@@ -573,8 +584,9 @@ body {
     }
 
     .more-dropdown {
-        bottom: 70px;
         left: 50%;
+        top: auto;
+        bottom: 60px;
         transform: translateX(-50%);
     }
 
