@@ -22,7 +22,14 @@ function switchTab(viewId) {
     document.getElementById(viewId).style.display = 'block';
 
     document.querySelectorAll('.sidebar nav a').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    
+    // Güvenli aktif sekme işaretleme
+    const links = document.querySelectorAll('.sidebar nav a');
+    links.forEach(link => {
+        if (link.getAttribute('onclick') && link.getAttribute('onclick').includes(viewId)) {
+            link.classList.add('active');
+        }
+    });
 
     if (viewId === 'graphicsView') loadChartData();
     if (viewId === 'calendarView') loadCalendarGrid();
@@ -143,7 +150,6 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
         const entries = snapshot.val() || {};
         const sortedDates = Object.keys(entries).sort().reverse();
 
-        // Eğer bu tarihe daha önce kayıt girilmişse, sadece en son girilen ilk 2 kayıt (index 0 ve 1) değiştirebilir[cite: 6]
         if (entries[date]) {
             const isOneOfLastTwo = (sortedDates[0] === date || sortedDates[1] === date);
             if (!isOneOfLastTwo) {
@@ -272,7 +278,7 @@ function loadChartData() {
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
-                            else if (currentMetric === 'calisma') val = Number(entries[dateKey].sure) || 0;
+                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
                             userMonthTotal += val;
                         }
                     });
@@ -310,7 +316,7 @@ function loadChartData() {
                             let val = 0;
                             if (currentMetric === 'soru') val = entries[dateKey].soru || 0;
                             else if (currentMetric === 'kitap') val = entries[dateKey].sayfa || 0;
-                            else if (currentMetric === 'calisma') val = Number(entries[dateKey].sure) || 0;
+                            else if (currentMetric === 'calisma') val = entries[dateKey].sure || 0;
                             userYearTotal += val;
                         }
                     });
@@ -361,7 +367,6 @@ function loadChartData() {
 
                 userValues.push(currentMetric === 'calisma' ? Number(uVal.toFixed(2)) : uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
-                // ÇALIŞMA metriğinde ortalamayı da ondalıklı (toFixed(2)) tutuyoruz ki yuvarlanmasın
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             }
         }
@@ -370,7 +375,6 @@ function loadChartData() {
         if (currentMetric === 'kitap') labelName = 'Okunan Sayfa (Kitap)';
         if (currentMetric === 'calisma') labelName = 'Çalışma Süresi (Saat)';
 
-        // Mobil cihazlar için nokta boyutunu büyütme ayarı (Mobilde 6px, bilgisayarda 3px)
         const isMobile = window.innerWidth <= 768;
         const dynamicPointRadius = isMobile ? 6 : 3;
         const dynamicHoverRadius = isMobile ? 9 : 5;
@@ -421,6 +425,7 @@ function changeCalendarMonth(offset) {
     loadCalendarGrid();
 }
 
+// Takvim Günlerine Tıklama ve Sınırlandırma Özelliği Eklendi
 function loadCalendarGrid() {
     const user = auth.currentUser;
     if (!user) return;
@@ -446,10 +451,55 @@ function loadCalendarGrid() {
             const div = document.createElement('div');
             div.className = 'cal-day';
             div.innerText = day;
+            div.style.cursor = 'pointer'; // Tıklanabilir olduğunu gösterir
 
             if (data[dateStr]) {
                 div.classList.add('worked');
             }
+
+            // Takvim gününe tıklandığında çalışacak kontrol ve yönlendirme mantığı
+            div.onclick = () => {
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+
+                const thirtyDaysAgoObj = new Date(todayObj);
+                thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+
+                const selectedObj = new Date(dateStr);
+                selectedObj.setHours(0, 0, 0, 0);
+
+                // Son 30 gün içinde değilse veya gelecek tarihse engelle
+                if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
+                    alert("Bu tarihe gidemezsiniz! Sadece son 30 gün içindeki tarihlere kayıt girebilir veya inceleyebilirsiniz. Gelecek tarihler seçilemez. 🛑");
+                    return;
+                }
+
+                // Günlük kayıt (Bilgi Girişi) sekmesine git
+                switchTab('createView');
+
+                // Tarih inputunu seçilen güne ayarla
+                const dateInput = document.getElementById('studyDate');
+                if (dateInput) {
+                    dateInput.value = dateStr;
+                }
+
+                // Eğer o güne ait daha önceden kayıt varsa formu doldur, yoksa sıfırla
+                db.ref(`users/${user.uid}/entries/${dateStr}`).once('value', snap => {
+                    const entry = snap.val();
+                    if (entry) {
+                        document.getElementById('studyQuestions').value = entry.soru || 0;
+                        document.getElementById('studyPages').value = entry.sayfa || 0;
+                        const totalHours = entry.sure || 0;
+                        const hours = Math.floor(totalHours);
+                        const minutes = Math.round((totalHours - hours) * 60);
+                        document.getElementById('studyHours').value = hours;
+                        document.getElementById('studyMinutes').value = minutes;
+                    } else {
+                        document.getElementById('studyForm').reset();
+                        document.getElementById('studyDate').value = dateStr;
+                    }
+                });
+            };
 
             grid.appendChild(div);
         }
@@ -487,7 +537,6 @@ function loadReportsTable() {
             const tr = document.createElement('tr');
             
             let actionHtml = '';
-            // Tablodaki ilk 2 satır (en son girilen en yeni 2 kayıt) için düzenle butonu gösterilir[cite: 6]
             if (index < 2) {
                 actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 2px 6px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>`;
             }
