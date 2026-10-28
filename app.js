@@ -28,6 +28,28 @@ function switchTab(viewId) {
     if (viewId === 'calendarView') loadCalendarGrid();
     if (viewId === 'reportsView') loadReportsTable();
     if (viewId === 'profileView') loadProfileData();
+    if (viewId === 'createView') {
+        setAllowedDates();
+    }
+}
+
+// Son 30 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı
+function setAllowedDates() {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const minStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+    const dateInput = document.getElementById('studyDate');
+    if (dateInput) {
+        dateInput.min = minStr;
+        dateInput.max = todayStr;
+        if (!dateInput.value) {
+            dateInput.value = todayStr;
+        }
+    }
 }
 
 function openRegister() {
@@ -49,6 +71,7 @@ auth.onAuthStateChanged(user => {
         
         loadUserProfile(user);
         loadChartData();
+        setAllowedDates();
     } else {
         document.getElementById('authSection').style.display = 'flex';
         document.getElementById('dashboardSection').style.display = 'none';
@@ -94,13 +117,28 @@ function logoutUser() {
     auth.signOut();
 }
 
-// Bilgi Girişi ve Sınır Kontrolleri
+// Bilgi Girişi ve Sınır Kontrolleri (Son 30 gün ve gelecek tarih engeli)
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) return;
 
     const date = document.getElementById('studyDate').value;
+    
+    const todayObj = new Date();
+    todayObj.setHours(0,0,0,0);
+    
+    const thirtyDaysAgoObj = new Date(todayObj);
+    thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+
+    const selectedObj = new Date(date);
+    selectedObj.setHours(0,0,0,0);
+
+    if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
+        alert("Sadece son 30 gün içine kayıt girebilir veya düzenleyebilirsiniz. Gelecek tarihlere kayıt yapılamaz! 🛑");
+        return;
+    }
+
     const questions = Number(document.getElementById('studyQuestions').value) || 0;
     const pages = Number(document.getElementById('studyPages').value) || 0;
     const hours = Number(document.getElementById('studyHours').value) || 0;
@@ -131,6 +169,7 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
         .then(() => {
             alert("Çalışma başarıyla kaydedildi! 🚀");
             document.getElementById('studyForm').reset();
+            setAllowedDates();
         })
         .catch(err => alert("Kayıt hatası: " + err.message));
 });
@@ -141,6 +180,19 @@ function markAsNotStudied() {
         alert("Lütfen bir tarih seçin.");
         return;
     }
+
+    const todayObj = new Date();
+    todayObj.setHours(0,0,0,0);
+    const thirtyDaysAgoObj = new Date(todayObj);
+    thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+    const selectedObj = new Date(dateInput);
+    selectedObj.setHours(0,0,0,0);
+
+    if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
+        alert("Geçersiz tarih seçimi! Sadece son 30 gün içinde işlem yapabilirsiniz. 🛑");
+        return;
+    }
+
     const user = auth.currentUser;
     db.ref(`users/${user.uid}/entries/${dateInput}`).set({ soru: 0, sayfa: 0, sure: 0, calismadi: true })
         .then(() => alert("Bugün çalışılmadı olarak işaretlendi."));
@@ -263,7 +315,7 @@ function loadChartData() {
                         let val = 0;
                         if (currentMetric === 'soru') val = dayEntry.soru || 0;
                         else if (currentMetric === 'kitap') val = dayEntry.sayfa || 0;
-                        else if (currentMetric === 'calisma') val = Number(dayEntry.sure) || 0; // Sayısal dönüşüm güvencesi
+                        else if (currentMetric === 'calisma') val = Number(dayEntry.sure) || 0;
 
                         activeSum += val;
                         activeCount++;
@@ -275,7 +327,6 @@ function loadChartData() {
 
                 userValues.push(uVal);
                 let avg = activeCount > 0 ? (activeSum / activeCount) : 0;
-                // Çalışma süresi için ondalıklı net ortalama (toFixed(2)), diğerleri için tam sayı
                 avgValues.push(currentMetric === 'calisma' ? Number(avg.toFixed(2)) : Math.round(avg));
             }
         }
@@ -363,7 +414,7 @@ function loadCalendarGrid() {
     });
 }
 
-// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayda düzenle butonu eklendi)
+// Tüm Çalışma Kayıtları Tablosu (Sadece en son girilen ilk 2 kayıt için düzenle butonu)
 function loadReportsTable() {
     const user = auth.currentUser;
     if (!user) return;
@@ -373,6 +424,7 @@ function loadReportsTable() {
         const tbody = document.getElementById('reportsTableBody');
         tbody.innerHTML = '';
 
+        // Kayıtları tarihe göre tersten sıralıyoruz (En yeni en üstte)
         const sortedDates = Object.keys(data).sort().reverse();
 
         if (sortedDates.length === 0) {
@@ -391,10 +443,10 @@ function loadReportsTable() {
 
             const tr = document.createElement('tr');
             
-            // Sadece en son girilen ilk 2 kayıt (index 0 ve 1) için düzenle butonu gösterilir
             let actionHtml = '';
+            // Tablodaki ilk 2 satır, sisteme en son girilen en yeni 2 kayıttır.
             if (index < 2) {
-                actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-pen"></i> Düzenle</button>`;
+                actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 2px 6px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>`;
             }
 
             tr.innerHTML = `
@@ -409,7 +461,6 @@ function loadReportsTable() {
     });
 }
 
-// Kayıt Düzenleme Fonksiyonu (Seçilen son kaydı bilgi girişine taşıyarak güncellemeyi sağlar)
 function editEntry(dateStr) {
     switchTab('createView');
     document.getElementById('studyDate').value = dateStr;
