@@ -24,11 +24,11 @@
                 <a href="#" onclick="switchTab('createView')" title="Bilgi Girişi"><i class="fa-solid fa-pen-to-square"></i></a>
                 
                 <!-- 3 Çizgili Menü (Profil ve Hakkımda) -->
-                <div style="position: relative; display: flex; justify-content: center; width: 100%;">
+                <div class="menu-dropdown-container">
                     <a href="javascript:void(0)" onclick="toggleMoreMenu()" title="Menü"><i class="fa-solid fa-bars"></i></a>
-                    <div id="moreDropdownMenu" style="display: none; position: absolute; left: 70px; bottom: 0; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 8px; width: 140px; z-index: 2000; border: 1px solid #e2e8f0;">
-                        <a href="#" onclick="switchTab('profileView'); toggleMoreMenu();" style="display: flex; align-items: center; gap: 8px; padding: 10px; color: #334155; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; width: 100%;"><i class="fa-solid fa-user" style="color: #4f46e5;"></i> Profil</a>
-                        <a href="#" onclick="switchTab('aboutView'); toggleMoreMenu();" style="display: flex; align-items: center; gap: 8px; padding: 10px; color: #334155; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600; width: 100%;"><i class="fa-solid fa-circle-info" style="color: #22c55e;"></i> Hakkımda</a>
+                    <div id="moreDropdownMenu" class="more-dropdown">
+                        <a href="#" onclick="switchTab('profileView'); toggleMoreMenu();"><i class="fa-solid fa-user" style="color: #4f46e5;"></i> Profil</a>
+                        <a href="#" onclick="switchTab('aboutView'); toggleMoreMenu();"><i class="fa-solid fa-circle-info" style="color: #22c55e;"></i> Hakkımda</a>
                     </div>
                 </div>
 
@@ -260,7 +260,7 @@
                     </div>
                 </div>
 
-                <!-- PROFIL BÖLÜMÜ (Sınıf Güncellenebilir Hale Getirildi) -->
+                <!-- PROFIL BÖLÜMÜ -->
                 <div id="profileView" class="view-section" style="display: none;">
                     <div class="reports-card" style="max-width: 600px; margin: 0 auto;">
                         <div class="content-header">
