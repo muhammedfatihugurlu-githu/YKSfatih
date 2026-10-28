@@ -369,6 +369,11 @@ function loadChartData() {
         if (currentMetric === 'kitap') labelName = 'Okunan Sayfa (Kitap)';
         if (currentMetric === 'calisma') labelName = 'Çalışma Süresi (Saat)';
 
+        // Mobil cihazlar için nokta boyutunu büyütme ayarı (Bilgisayarda 3px, mobilde 6px)
+        const isMobile = window.innerWidth <= 768;
+        const dynamicPointRadius = isMobile ? 6 : 3;
+        const dynamicHoverRadius = isMobile ? 9 : 5;
+
         const ctx = document.getElementById('studyChart').getContext('2d');
         if (myChart) myChart.destroy();
 
@@ -383,7 +388,9 @@ function loadChartData() {
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         fill: true,
-                        tension: 0.3
+                        tension: 0.3,
+                        pointRadius: dynamicPointRadius,
+                        pointHoverRadius: dynamicHoverRadius
                     },
                     {
                         label: 'Genel Ortalama',
@@ -391,7 +398,9 @@ function loadChartData() {
                         borderColor: '#f59e0b',
                         borderDash: [5, 5],
                         backgroundColor: 'transparent',
-                        tension: 0.3
+                        tension: 0.3,
+                        pointRadius: dynamicPointRadius,
+                        pointHoverRadius: dynamicHoverRadius
                     }
                 ]
             },
