@@ -245,7 +245,7 @@ function markAsNotStudied() {
         if (entries[dateInput]) {
             const isOneOfLastTwo = (sortedDates[0] === dateInput || sortedDates[1] === dateInput);
             if (!isOneOfLastTwo) {
-                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece son 2 kaydınızı değiştirebilirsiniz! 🛑");
+                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece en son girilen son 2 kaydınızı değiştirebilirsiniz! 🛑");
                 return;
             }
         }

@@ -71,6 +71,47 @@ body {
     color: #ffffff;
 }
 
+/* 3 Çizgili Menü & Dropdown Kapsayıcısı */
+.menu-dropdown-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px;
+    height: 48px;
+}
+
+.more-dropdown {
+    display: none;
+    position: absolute;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 8px;
+    width: 140px;
+    z-index: 2000;
+    border: 1px solid #e2e8f0;
+}
+
+.more-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    color: #334155;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    height: auto !important;
+}
+
+.more-dropdown a:hover {
+    background: #f1f5f9;
+    color: #4f46e5;
+}
+
 .main-content {
     flex: 1;
     overflow-y: auto;
@@ -471,6 +512,16 @@ body {
 }
 
 /* ==========================================
+   MASAÜSTÜ SPESİFİK YÖNLENDİRMELER (Desktop)
+   ========================================== */
+@media (min-width: 769px) {
+    .more-dropdown {
+        left: 70px;
+        bottom: 0;
+    }
+}
+
+/* ==========================================
    MOBİL İÇİN RESPONSIVE (DUYARLI) DÜZEN
    ========================================== */
 @media (max-width: 768px) {
@@ -510,6 +561,7 @@ body {
     .sidebar nav {
         flex-direction: row;
         justify-content: space-around;
+        align-items: center;
         width: 100%;
         gap: 0;
     }
@@ -518,6 +570,17 @@ body {
         width: 44px;
         height: 44px;
         font-size: 18px;
+    }
+
+    .menu-dropdown-container {
+        width: 44px;
+        height: 44px;
+    }
+
+    .more-dropdown {
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .welcome-banner {
@@ -584,64 +647,4 @@ body {
         padding: 10px 8px;
         font-size: 12px;
     }
-    
-    /* 3 Çizgili Menü / Dropdown Konumlandırma Stilleri */
-.menu-dropdown-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-}
-
-.more-dropdown {
-    display: none;
-    position: absolute;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    padding: 8px;
-    width: 140px;
-    z-index: 2000;
-    border: 1px solid #e2e8f0;
-}
-
-.more-dropdown a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    color: #334155;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    width: 100%;
-    height: auto !important;
-}
-
-.more-dropdown a:hover {
-    background: #f1f5f9;
-    color: #4f46e5;
-}
-
-/* Masaüstü Görünümde Menü Sağa Açılır */
-@media (min-width: 769px) {
-    .more-dropdown {
-        left: 70px;
-        bottom: 0;
-    }
-}
-
-/* Mobil Görünümde Menü Alttan Yukarı Doğru Ortalanarak Açılır */
-@media (max-width: 768px) {
-    .menu-dropdown-container {
-        width: auto;
-    }
-    .more-dropdown {
-        bottom: 75px;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-}
 }
