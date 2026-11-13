@@ -1,5 +1,4 @@
 
-
 const firebaseConfig = {
     apiKey: "AIzaSyDWCM6kkyW1uhMVdYaYQEzfNZM6GM9tmUY",
     authDomain: "fetih-social.firebaseapp.com",
