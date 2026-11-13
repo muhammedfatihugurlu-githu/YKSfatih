@@ -1,3 +1,5 @@
+
+
 const firebaseConfig = {
     apiKey: "AIzaSyDWCM6kkyW1uhMVdYaYQEzfNZM6GM9tmUY",
     authDomain: "fetih-social.firebaseapp.com",
@@ -61,14 +63,14 @@ window.addEventListener('click', function(e) {
     }
 });
 
-// Son 30 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı[cite: 6]
+// Son 90 gün ile bugün arasını izin veren, gelecek tarihleri kapatan tarih ayarı
 function setAllowedDates() {
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const minStr = thirtyDaysAgo.toISOString().split('T')[0];
+    const ninetyDaysAgo = new Date(today);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const minStr = ninetyDaysAgo.toISOString().split('T')[0];
 
     const dateInput = document.getElementById('studyDate');
     if (dateInput) {
@@ -90,7 +92,7 @@ function openLogin() {
     document.getElementById('loginFormSection').style.display = 'block';
 }
 
-// Oturum Kontrolü ve Profil Bilgisi Yükleme[cite: 6]
+// Oturum Kontrolü ve Profil Bilgisi Yükleme
 auth.onAuthStateChanged(user => {
     if (user) {
         document.getElementById('authSection').style.display = 'none';
@@ -145,7 +147,7 @@ function logoutUser() {
     auth.signOut();
 }
 
-// Bilgi Girişi ve Sınır Kontrolleri (Sadece son 2 kayıt güncellenebilir, eskiler değiştirilemez)[cite: 6]
+// Bilgi Girişi ve Sınır Kontrolleri (Son 90 gün içindeki herhangi bir kayıt güncellenebilir)
 document.getElementById('studyForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -156,64 +158,51 @@ document.getElementById('studyForm').addEventListener('submit', (e) => {
     const todayObj = new Date();
     todayObj.setHours(0,0,0,0);
     
-    const thirtyDaysAgoObj = new Date(todayObj);
-    thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+    const ninetyDaysAgoObj = new Date(todayObj);
+    ninetyDaysAgoObj.setDate(ninetyDaysAgoObj.getDate() - 90);
 
     const selectedObj = new Date(date);
     selectedObj.setHours(0,0,0,0);
 
-    if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
-        alert("Sadece son 30 gün içinde kayıt girebilirsiniz. Gelecek tarihlere kayıt yapılamaz! 🛑");
+    if (selectedObj < ninetyDaysAgoObj || selectedObj > todayObj) {
+        alert("Sadece son 90 gün içinde kayıt girebilir veya güncelleyebilirsiniz. Gelecek tarihlere işlem yapılamaz! 🛑");
         return;
     }
 
-    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
-        const entries = snapshot.val() || {};
-        const sortedDates = Object.keys(entries).sort().reverse();
+    const questions = Number(document.getElementById('studyQuestions').value) || 0;
+    const pages = Number(document.getElementById('studyPages').value) || 0;
+    const hours = Number(document.getElementById('studyHours').value) || 0;
+    const minutes = Number(document.getElementById('studyMinutes').value) || 0;
+    const totalHours = hours + (minutes / 60);
 
-        if (entries[date]) {
-            const isOneOfLastTwo = (sortedDates[0] === date || sortedDates[1] === date);
-            if (!isOneOfLastTwo) {
-                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece en son girilen son 2 kaydınızı değiştirebilirsiniz! 🛑");
-                return;
-            }
-        }
+    if (questions > 720) {
+        alert("Günlük en fazla 720 soru girebilirsin! 🛑");
+        return;
+    }
+    if (pages > 600) {
+        alert("Günlük en fazla 600 sayfa kitap okuyabilirsin! 🛑");
+        return;
+    }
+    if (totalHours > 16) {
+        alert("Günlük çalışma süresi en fazla 16 saat olabilir! 🛑");
+        return;
+    }
 
-        const questions = Number(document.getElementById('studyQuestions').value) || 0;
-        const pages = Number(document.getElementById('studyPages').value) || 0;
-        const hours = Number(document.getElementById('studyHours').value) || 0;
-        const minutes = Number(document.getElementById('studyMinutes').value) || 0;
-        const totalHours = hours + (minutes / 60);
+    const entryData = {
+        soru: questions,
+        sayfa: pages,
+        sure: totalHours,
+        timestamp: Date.now()
+    };
 
-        if (questions > 720) {
-            alert("Günlük en fazla 720 soru girebilirsin! 🛑");
-            return;
-        }
-        if (pages > 600) {
-            alert("Günlük en fazla 600 sayfa kitap okuyabilirsin! 🛑");
-            return;
-        }
-        if (totalHours > 16) {
-            alert("Günlük çalışma süresi en fazla 16 saat olabilir! 🛑");
-            return;
-        }
-
-        const entryData = {
-            soru: questions,
-            sayfa: pages,
-            sure: totalHours,
-            timestamp: Date.now()
-        };
-
-        db.ref(`users/${user.uid}/entries/${date}`).set(entryData)
-            .then(() => {
-                alert("Çalışma başarıyla kaydedildi! 🚀");
-                document.getElementById('studyForm').reset();
-                setAllowedDates();
-                loadChartData();
-            })
-            .catch(err => alert("Kayıt hatası: " + err.message));
-    });
+    db.ref(`users/${user.uid}/entries/${date}`).set(entryData)
+        .then(() => {
+            alert("Çalışma başarıyla kaydedildi/güncellendi! 🚀");
+            document.getElementById('studyForm').reset();
+            setAllowedDates();
+            loadChartData();
+        })
+        .catch(err => alert("Kayıt hatası: " + err.message));
 });
 
 function markAsNotStudied() {
@@ -225,38 +214,25 @@ function markAsNotStudied() {
 
     const todayObj = new Date();
     todayObj.setHours(0,0,0,0);
-    const thirtyDaysAgoObj = new Date(todayObj);
-    thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+    const ninetyDaysAgoObj = new Date(todayObj);
+    ninetyDaysAgoObj.setDate(ninetyDaysAgoObj.getDate() - 90);
     const selectedObj = new Date(dateInput);
     selectedObj.setHours(0,0,0,0);
 
-    if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
-        alert("Geçersiz tarih seçimi! Sadece son 30 gün içinde işlem yapabilirsiniz. 🛑");
+    if (selectedObj < ninetyDaysAgoObj || selectedObj > todayObj) {
+        alert("Geçersiz tarih seçimi! Sadece son 90 gün içinde işlem yapabilirsiniz. 🛑");
         return;
     }
 
     const user = auth.currentUser;
     if (!user) return;
 
-    db.ref(`users/${user.uid}/entries`).once('value', snapshot => {
-        const entries = snapshot.val() || {};
-        const sortedDates = Object.keys(entries).sort().reverse();
-
-        if (entries[dateInput]) {
-            const isOneOfLastTwo = (sortedDates[0] === dateInput || sortedDates[1] === dateInput);
-            if (!isOneOfLastTwo) {
-                alert("Bu tarihe daha önce kayıt girilmiş ve eski bir kayıt olduğu için değiştirilemez. Sadece en son girilen son 2 kaydınızı değiştirebilirsiniz! 🛑");
-                return;
-            }
-        }
-
-        db.ref(`users/${user.uid}/entries/${dateInput}`).set({ soru: 0, sayfa: 0, sure: 0, calismadi: true })
-            .then(() => {
-                alert("Bugün çalışılmadı olarak işaretlendi.");
-                setAllowedDates();
-                loadChartData();
-            });
-    });
+    db.ref(`users/${user.uid}/entries/${dateInput}`).set({ soru: 0, sayfa: 0, sure: 0, calismadi: true })
+        .then(() => {
+            alert("Seçilen gün çalışılmadı olarak güncellendi.");
+            setAllowedDates();
+            loadChartData();
+        });
 }
 
 function setChartMetric(metric, btn) {
@@ -481,14 +457,14 @@ function loadCalendarGrid() {
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
 
-                const thirtyDaysAgoObj = new Date(todayObj);
-                thirtyDaysAgoObj.setDate(thirtyDaysAgoObj.getDate() - 30);
+                const ninetyDaysAgoObj = new Date(todayObj);
+                ninetyDaysAgoObj.setDate(ninetyDaysAgoObj.getDate() - 90);
 
                 const selectedObj = new Date(dateStr);
                 selectedObj.setHours(0, 0, 0, 0);
 
-                if (selectedObj < thirtyDaysAgoObj || selectedObj > todayObj) {
-                    alert("Bu tarihe gidemezsiniz! Sadece son 30 gün içindeki tarihlere kayıt girebilir veya inceleyebilirsiniz. Gelecek tarihler seçilemez. 🛑");
+                if (selectedObj < ninetyDaysAgoObj || selectedObj > todayObj) {
+                    alert("Bu tarihe gidemezsiniz! Sadece son 90 gün içindeki tarihlere kayıt girebilir veya inceleyebilirsiniz. Gelecek tarihler seçilemez. 🛑");
                     return;
                 }
 
@@ -539,7 +515,7 @@ function loadReportsTable() {
             return;
         }
 
-        sortedDates.forEach((dateStr, index) => {
+        sortedDates.forEach((dateStr) => {
             const entry = data[dateStr];
             const totalHours = entry.sure || 0;
             const hours = Math.floor(totalHours);
@@ -550,10 +526,8 @@ function loadReportsTable() {
 
             const tr = document.createElement('tr');
             
-            let actionHtml = '';
-            if (index < 2) {
-                actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 2px 6px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>`;
-            }
+            // Son 90 gün içindeki tüm kayıtlar için düzenle butonu aktif
+            const actionHtml = `<button onclick="editEntry('${dateStr}')" style="padding: 2px 6px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;" title="Düzenle"><i class="fa-solid fa-pen"></i></button>`;
 
             tr.innerHTML = `
                 <td>${formattedDate}</td>
