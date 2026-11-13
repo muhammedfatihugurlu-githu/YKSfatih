@@ -1,4 +1,3 @@
-
 const firebaseConfig = {
     apiKey: "AIzaSyDWCM6kkyW1uhMVdYaYQEzfNZM6GM9tmUY",
     authDomain: "fetih-social.firebaseapp.com",
@@ -456,6 +455,7 @@ function loadCalendarGrid() {
                 const todayObj = new Date();
                 todayObj.setHours(0, 0, 0, 0);
 
+                // BURASI 90 GÜN OLARak DÜZELTİLDİ
                 const ninetyDaysAgoObj = new Date(todayObj);
                 ninetyDaysAgoObj.setDate(ninetyDaysAgoObj.getDate() - 90);
 
